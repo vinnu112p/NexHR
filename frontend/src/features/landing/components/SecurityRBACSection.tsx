@@ -48,7 +48,7 @@ export const SecurityRBACSection: React.FC = () => {
         'Create, Compute & Confirm Monthly Payruns',
         'Generate, Print & Email Verified Bulk Payslips',
         'Full Access to Employee Lifecycle Records',
-        'Attendance & Time-Off Status Verification',
+        'Review & Approve Leave Requests, Attendance & Time-Off Management',
       ],
       denied: [
         'Modify Salary Rules & Mathematical Formulas (Read-Only)',

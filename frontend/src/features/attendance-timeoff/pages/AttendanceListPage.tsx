@@ -13,7 +13,7 @@ import { useRealtimeSubscription } from '../../../context/RealtimeContext';
 
 export const AttendanceListPage: React.FC = () => {
   const { user } = useAuth();
-  const isHR = ['admin', 'hr_manager', 'hr_payroll_manager'].includes(user?.role?.id || '');
+  const isHR = ['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user'].includes(user?.role?.id || '');
 
   const [attendances, setAttendances] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);

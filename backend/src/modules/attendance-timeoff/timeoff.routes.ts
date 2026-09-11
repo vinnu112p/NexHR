@@ -14,7 +14,7 @@ router.get('/types', authMiddleware, async (req, res) => {
   return res.json({ success: true, data: result.rows || [] });
 });
 
-router.post('/types', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req, res) => {
+router.post('/types', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req, res) => {
   const { name, unit, requires_allocation, approval_workflow, is_paid, display_color } = req.body;
 
   if (!name || !unit) {
@@ -38,7 +38,7 @@ router.post('/types', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_pa
   return res.status(201).json({ success: true, data: result.rows?.[0] });
 });
 
-router.put('/types/:id', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req, res) => {
+router.put('/types/:id', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req, res) => {
   const { id } = req.params;
   const { name, unit, requires_allocation, approval_workflow, is_paid, display_color } = req.body;
 
@@ -137,7 +137,7 @@ router.get('/allocations/my', authMiddleware, async (req: AuthenticatedRequest, 
   return res.json({ success: true, data: formatted });
 });
 
-router.post('/allocations', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req, res) => {
+router.post('/allocations', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req, res) => {
   const { employee_id, time_off_type_id, allocated, valid_from, valid_until } = req.body;
 
   if (!employee_id || !time_off_type_id || allocated === undefined || !valid_from || !valid_until) {
@@ -157,7 +157,7 @@ router.post('/allocations', authMiddleware, requireRole(['admin', 'hr_manager', 
   return res.status(201).json({ success: true, data: result.rows?.[0] });
 });
 
-router.put('/allocations/:id', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req, res) => {
+router.put('/allocations/:id', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req, res) => {
   const { id } = req.params;
   const { allocated, valid_from, valid_until } = req.body;
 
@@ -393,7 +393,7 @@ router.post('/requests', authMiddleware, async (req: AuthenticatedRequest, res: 
 // ----------------------------------------------------------------------
 // POST /requests/:id/approve — Approve Request & Deduct Balance
 // ----------------------------------------------------------------------
-router.post('/requests/:id/approve', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/requests/:id/approve', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
 
   const reqRes = await query('SELECT * FROM time_off_requests WHERE id = $1', [String(id)]);
@@ -440,7 +440,7 @@ router.post('/requests/:id/approve', authMiddleware, requireRole(['admin', 'hr_m
 // ----------------------------------------------------------------------
 // POST /requests/:id/refuse — Refuse Request
 // ----------------------------------------------------------------------
-router.post('/requests/:id/refuse', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/requests/:id/refuse', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
 
   const reqRes = await query('SELECT * FROM time_off_requests WHERE id = $1', [String(id)]);

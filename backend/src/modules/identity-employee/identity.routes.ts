@@ -137,7 +137,7 @@ router.get('/auth/me', authMiddleware, async (req: AuthenticatedRequest, res: Re
 router.put('/auth/profile', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   const targetUserId = req.user?.userId || req.user?.id;
   const userRole = req.user?.roleId || 'employee';
-  const isAdminOrHR = ['admin', 'hr_manager', 'hr_payroll_manager'].includes(userRole);
+  const isAdminOrHR = ['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user'].includes(userRole);
 
   const {
     first_name,
@@ -242,7 +242,7 @@ router.get('/departments', authMiddleware, async (req, res) => {
   return res.json({ success: true, data: depts });
 });
 
-router.post('/departments', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req, res) => {
+router.post('/departments', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req, res) => {
   const { name, code } = req.body;
   if (!name) {
     return res.status(400).json({ success: false, error: { code: 'MISSING_FIELDS', message: 'Department name is required.' } });
@@ -418,7 +418,7 @@ router.get('/employees/:id', authMiddleware, async (req: AuthenticatedRequest, r
   });
 });
 
-router.post('/employees', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req, res) => {
+router.post('/employees', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req, res) => {
   const {
     first_name, last_name, email, phone, job_position,
     department_id, working_schedule_id, private_email,
@@ -529,7 +529,7 @@ router.post('/employees', authMiddleware, requireRole(['admin', 'hr_manager', 'h
 router.put('/employees/:id', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
   const userRoleId = req.user?.roleId || '';
-  const isManager = ['admin', 'hr_manager', 'hr_payroll_manager'].includes(userRoleId);
+  const isManager = ['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user'].includes(userRoleId);
   const isSelf = String(req.user?.employeeId) === String(id);
 
   if (!isManager && !isSelf) {
@@ -719,7 +719,7 @@ router.get('/contracts', authMiddleware, async (req, res) => {
   return res.json({ success: true, data: contracts });
 });
 
-router.post('/contracts', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req, res) => {
+router.post('/contracts', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req, res) => {
   const { employee_id, contract_name, job_position, wage, start_date, end_date, working_schedule_id, salary_structure_id, notes } = req.body;
 
   if (!employee_id || !wage || !start_date) {
@@ -774,7 +774,7 @@ router.post('/contracts', authMiddleware, requireRole(['admin', 'hr_manager', 'h
   return res.status(201).json({ success: true, data: newContract });
 });
 
-router.put('/contracts/:id', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req, res) => {
+router.put('/contracts/:id', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req, res) => {
   const { id } = req.params;
   const { contract_name, job_position, wage, start_date, end_date, status, working_schedule_id, salary_structure_id } = req.body;
 
@@ -865,7 +865,7 @@ router.get('/schedules', authMiddleware, async (req, res) => {
   return res.json({ success: true, data: schedules });
 });
 
-router.post('/schedules', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req, res) => {
+router.post('/schedules', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req, res) => {
   const { name, days } = req.body;
   if (!name || !days || !Array.isArray(days)) {
     return res.status(400).json({

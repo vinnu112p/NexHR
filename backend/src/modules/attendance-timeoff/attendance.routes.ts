@@ -190,7 +190,7 @@ router.post('/check-out', authMiddleware, async (req: AuthenticatedRequest, res:
 // ----------------------------------------------------------------------
 // 5. POST /attendance — Manual Attendance Entry (HR / Admin)
 // ----------------------------------------------------------------------
-router.post('/', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req: AuthenticatedRequest, res: Response) => {
+router.post('/', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req: AuthenticatedRequest, res: Response) => {
   const { employee_id, check_in, check_out, audit_note } = req.body;
 
   if (!employee_id || !check_in) {
@@ -234,7 +234,7 @@ router.post('/', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll
 // ----------------------------------------------------------------------
 // 6. PUT /attendance/:id — Manual Attendance Correction with Audit Log
 // ----------------------------------------------------------------------
-router.put('/:id', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req: AuthenticatedRequest, res: Response) => {
+router.put('/:id', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user']), async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
   const { check_in, check_out, audit_note } = req.body;
 

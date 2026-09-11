@@ -43,7 +43,7 @@ interface UserProfileModalProps {
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) => {
   const { user, login } = useAuth();
   const roleId = user?.role?.id?.toLowerCase() || 'employee';
-  const isAdminOrHR = ['admin', 'hr_manager', 'hr_payroll_manager'].includes(roleId);
+  const isAdminOrHR = ['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user'].includes(roleId);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');

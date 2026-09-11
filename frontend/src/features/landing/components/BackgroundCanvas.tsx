@@ -23,9 +23,20 @@ export const BackgroundCanvas: React.FC = () => {
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(count * 3);
 
-    for (let i = 0; i < count * 3; i++) {
-      positions[i] = (Math.random() - 0.5) * 12;
-    }
+    // for (let i = 0; i < count * 3; i++) {
+    //   positions[i] = (Math.random() - 0.5) * 12;
+    // }
+
+    let i = 0;
+   
+
+    
+
+    while(i < count*3){
+      positions[i] = (Math.random() - 0.5 )* 12;
+      i++;
+      
+   }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 

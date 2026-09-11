@@ -52,7 +52,7 @@ export const EmployeeFormPage: React.FC = () => {
   const auth = useAuth();
   const currentUser = auth?.user;
   const currentNormalizedRole = getNormalizedRole(currentUser);
-  const canManageRoles = ['admin', 'hr_manager', 'hr_payroll_manager'].includes(currentNormalizedRole);
+  const canManageRoles = ['admin', 'hr_manager', 'hr_payroll_manager', 'hr_payroll_user'].includes(currentNormalizedRole);
 
   const [activeTab, setActiveTab] = useState<'work' | 'private' | 'leave' | 'security'>('work');
   const [departments, setDepartments] = useState<any[]>([]);
