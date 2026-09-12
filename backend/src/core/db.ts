@@ -4,12 +4,17 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// PostgreSQL direct pool (Dev C)
-let rawConnectionString = process.env.DATABASE_URL || 'postgresql://postgres.iejfvpcbkulrbzkfbdfu:%24OdooHackathon420@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres';
+let rawConnectionString = process.env.DATABASE_URL || '';
 
-// Auto-convert legacy/direct IPv6 Supabase domain to IPv4 Pooler host on any team environment
-if (rawConnectionString.includes('db.iejfvpcbkulrbzkfbdfu.supabase.co')) {
-  rawConnectionString = 'postgresql://postgres.iejfvpcbkulrbzkfbdfu:%24OdooHackathon420@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres';
+// Auto-convert direct IPv6 Supabase domain (db.<ref>.supabase.co) to IPv4 Pooler host (Mumbai ap-south-1)
+if (rawConnectionString.includes('db.') && rawConnectionString.includes('.supabase.co')) {
+  const match = rawConnectionString.match(/db\.([a-z0-9]+)\.supabase\.co/i);
+  if (match && match[1]) {
+    const projectRef = match[1];
+    rawConnectionString = rawConnectionString
+      .replace(new RegExp(`db\\.${projectRef}\\.supabase\\.co(:5432)?`), `aws-0-ap-south-1.pooler.supabase.com:6543`)
+      .replace('postgres:', `postgres.${projectRef}:`);
+  }
 }
 
 const connectionString = rawConnectionString;
@@ -41,11 +46,15 @@ export const supabase = isSupabaseConfigured
   ? createClient(SUPABASE_URL, SUPABASE_KEY)
   : null;
 
+let initPromise: Promise<void> | null = null;
+
 // Auto-initialize PostgreSQL tables and database seed data on connection
 export const initDb = async () => {
-  try {
-    // 1. Create all Tables if they do not exist
-    await pool.query(`
+  if (initPromise) return initPromise;
+  initPromise = (async () => {
+    try {
+      // 1. Create all Tables if they do not exist
+      await pool.query(`
       CREATE TABLE IF NOT EXISTS roles (
         id VARCHAR(50) PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
@@ -563,9 +572,13 @@ export const initDb = async () => {
     `);
 
     console.log('[DB] PostgreSQL database tables and seed data initialized successfully.');
-  } catch (err) {
-    console.error('[DB] Database init execution error:', err);
-  }
+    } catch (err: any) {
+      if (!err?.message?.includes('after calling end')) {
+        console.error('[DB] Database init execution error:', err);
+      }
+    }
+  })();
+  return initPromise;
 };
 
 // Initialize DB schema asynchronously

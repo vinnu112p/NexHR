@@ -29,8 +29,8 @@ export async function seedTrendHistory() {
       `, [m.id, m.name, m.start, m.end, m.emps, m.gross, m.net]);
 
       // Seed summary department-level payslips for this payrun so query grouping works
-      const depts = ['dept_eng', 'dept_hr', 'dept_sales', 'dept_finance', 'dept_1788611765232', 'dept_it', 'dept_ops'];
-      const deptGrossShare = [0.26, 0.22, 0.19, 0.16, 0.10, 0.04, 0.03];
+      const depts = ['dept_eng', 'dept_hr', 'dept_sales', 'dept_finance', 'dept_it', 'dept_ops'];
+      const deptGrossShare = [0.32, 0.24, 0.20, 0.14, 0.06, 0.04];
       
       // Clean existing payslips for these specific historical test payruns
       await client.query(`DELETE FROM payslips WHERE payrun_id = $1`, [m.id]);
