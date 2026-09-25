@@ -1,0 +1,64 @@
+<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Shield Gradient -->
+    <linearGradient id="nexthr_bg_grad" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#1E1B4B" />
+      <stop offset="50%" stopColor="#0F172A" />
+      <stop offset="100%" stopColor="#090D1A" />
+    </linearGradient>
+
+    <!-- Electric Indigo to Cyan Flow -->
+    <linearGradient id="nexthr_left_stem" x1="10" y1="12" x2="22" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#818CF8" />
+      <stop offset="50%" stopColor="#6366F1" />
+      <stop offset="100%" stopColor="#4338CA" />
+    </linearGradient>
+
+    <!-- Futuristic Diagonal Nexus Chevron -->
+    <linearGradient id="nexthr_chevron" x1="12" y1="12" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#38BDF8" />
+      <stop offset="50%" stopColor="#06B6D4" />
+      <stop offset="100%" stopColor="#4F46E5" />
+    </linearGradient>
+
+    <!-- Right Rising Stem -->
+    <linearGradient id="nexthr_right_stem" x1="28" y1="12" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#38BDF8" />
+      <stop offset="40%" stopColor="#818CF8" />
+      <stop offset="100%" stopColor="#6366F1" />
+    </linearGradient>
+
+    <!-- Inner Core Radial Glow -->
+    <radialGradient id="nexthr_glow" cx="24" cy="24" r="16" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#6366F1" stopOpacity="0.35" />
+      <stop offset="100%" stopColor="#06B6D4" stopOpacity="0" />
+    </radialGradient>
+
+    <!-- Border Glow Gradient -->
+    <linearGradient id="nexthr_border" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#818CF8" stopOpacity="0.4" />
+      <stop offset="50%" stopColor="#06B6D4" stopOpacity="0.2" />
+      <stop offset="100%" stopColor="#312E81" stopOpacity="0.5" />
+    </linearGradient>
+  </defs>
+
+  <!-- Base Squircle Container -->
+  <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#nexthr_bg_grad)" stroke="url(#nexthr_border)" stroke-width="1.2" />
+
+  <!-- Ambient Radiant Core -->
+  <circle cx="24" cy="24" r="14" fill="url(#nexthr_glow)" />
+
+  <!-- NextHR Stylized 'N' Geometry -->
+  <!-- Left Pillar with dynamic tapered cap -->
+  <path d="M13 13.5C13 12.67 13.67 12 14.5 12H17.5C18.33 12 19 12.67 19 13.5V34.5C19 35.33 18.33 36 17.5 36H14.5C13.67 36 13 35.33 13 34.5V13.5Z" fill="url(#nexthr_left_stem)" />
+
+  <!-- Dynamic Next-Chevron Diagonal Slash (Cutting forward & up) -->
+  <path d="M17.8 13.2C18.4 12.3 19.6 12 20.6 12.5L30.5 24.8C31.1 25.5 31 26.6 30.3 27.2L28.8 28.5C28.2 29 27.2 28.9 26.6 28.2L16.8 15.8C16.2 15 16.5 13.8 17.4 13.3L17.8 13.2Z" fill="url(#nexthr_chevron)" />
+
+  <!-- Forward Velocity Arrow Peak (representing 'Next') -->
+  <path d="M29 13.5C29 12.67 29.67 12 30.5 12H33.5C34.33 12 35 12.67 35 13.5V34.5C35 35.33 34.33 36 33.5 36H30.5C29.67 36 29 35.33 29 34.5V13.5Z" fill="url(#nexthr_right_stem)" />
+
+  <!-- Autonomous Central Spark / Quantum Dot -->
+  <circle cx="24" cy="24" r="2.8" fill="#FFFFFF" opacity="0.95" />
+  <circle cx="24" cy="24" r="1.6" fill="#38BDF8" />
+</svg>

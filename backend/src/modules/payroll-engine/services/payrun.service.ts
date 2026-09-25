@@ -1,5 +1,7 @@
 import { query } from '../../../core/db.js';
 import { SalaryStructureService } from './salary-structure.service.js';
+import { ProrationEngine } from './proration-engine.js';
+import { safeEvalExpression, safeEvalCondition } from './safe-evaluator.js';
 
 export interface Payrun {
   id: string;
@@ -159,12 +161,6 @@ export class PayrunService {
         };
       }
 
-      const baseWage = Number(rawContract.wage || 4500);
-      const contractStructId = rawContract.salary_structure_id || payrun.structure_id || 'struct_1';
-
-      const structure = await SalaryStructureService.getStructureById(contractStructId);
-      const rules = structure?.rules || [];
-
       // Calculate Overtime & Unpaid Leave Days
       const overtimeRes = await query(`
         SELECT COALESCE(SUM(overtime_hours), 0)::float as total_overtime
@@ -185,6 +181,32 @@ export class PayrunService {
       `, [String(empId), payrun.period_start, payrun.period_end]);
       const unpaidDays = unpaidRes.rows[0]?.unpaid_days || 0;
 
+      // Integrate ProrationEngine for accurate mid-month hires and unpaid leave adjustments
+      const proration = ProrationEngine.calculateProration(
+        {
+          id: rawContract.id || 0,
+          employee_id: empId,
+          wage: Number(rawContract.wage || 4500),
+          start_date: new Date(rawContract.start_date || payrun.period_start),
+          end_date: rawContract.end_date ? new Date(rawContract.end_date) : null,
+        },
+        {
+          startDate: new Date(payrun.period_start),
+          endDate: new Date(payrun.period_end),
+        },
+        0,
+        unpaidDays,
+        0,
+        overtimeHours
+      );
+
+      const baseWage = proration.proratedBasicWage;
+      const workedDays = proration.workedDays;
+      const contractStructId = rawContract.salary_structure_id || payrun.structure_id || 'struct_1';
+
+      const structure = await SalaryStructureService.getStructureById(contractStructId);
+      const rules = structure?.rules || [];
+
       // Compute salary components based on structure rules
       let totalAllowances = 0;
       let totalDeductions = 0;
@@ -194,18 +216,15 @@ export class PayrunService {
       let runningGross = baseWage;
 
       for (const rule of rules) {
-        // Condition evaluation check if specified
+        // Condition evaluation check using safe evaluator
         if (rule.condition_expression) {
-          const condStr = String(rule.condition_expression)
-            .replace(/\bOVERTIME_HOURS\b/g, String(overtimeHours))
-            .replace(/\bUNPAID_DAYS\b/g, String(unpaidDays))
-            .replace(/\bBASIC\b/g, String(baseWage));
-          try {
-            const isTrue = Boolean(Function(`"use strict"; return (${condStr});`)());
-            if (!isTrue) continue; // Skip rule if condition is false
-          } catch (e) {
-            console.warn(`Condition evaluation failed for rule ${rule.code}:`, e);
-          }
+          const isConditionMet = safeEvalCondition(rule.condition_expression, {
+            BASIC: baseWage,
+            CONTRACT_WAGE: Number(rawContract.wage || 4500),
+            OVERTIME_HOURS: overtimeHours,
+            UNPAID_DAYS: unpaidDays,
+          });
+          if (!isConditionMet) continue;
         }
 
         let lineAmount = 0;
@@ -217,19 +236,15 @@ export class PayrunService {
           const pct = Number(rule.amount || rule.value || 0) / 100;
           lineAmount = Math.round(baseWage * pct * 100) / 100;
         } else if (rule.computation_method === 'Formula' && rule.formula) {
-          const formulaStr = String(rule.formula)
-            .replace(/\bBASIC\b/g, String(baseWage))
-            .replace(/\bGROSS\b/g, String(runningGross))
-            .replace(/\bWORKED_DAYS\b/g, '22')
-            .replace(/\bOVERTIME_HOURS\b/g, String(overtimeHours))
-            .replace(/\bUNPAID_DAYS\b/g, String(unpaidDays));
-
-          try {
-            lineAmount = Number(Function('min', 'max', `"use strict"; return (${formulaStr});`)(Math.min, Math.max)) || 0;
-          } catch (e) {
-            console.warn(`Formula evaluation failed for rule ${rule.code}:`, e);
-            lineAmount = Number(rule.amount || 0);
-          }
+          lineAmount = safeEvalExpression(rule.formula, {
+            BASIC: baseWage,
+            CONTRACT_WAGE: Number(rawContract.wage || 4500),
+            GROSS: runningGross,
+            WORKED_DAYS: workedDays,
+            TOTAL_WORKING_DAYS: proration.totalWorkingDays,
+            OVERTIME_HOURS: overtimeHours,
+            UNPAID_DAYS: unpaidDays,
+          });
         } else {
           lineAmount = Number(rule.amount || 0);
         }
@@ -258,8 +273,8 @@ export class PayrunService {
         });
       }
 
-      // Check for unpaid days auto-deduction if no explicit UNPAID rule exists
-      if (unpaidDays > 0 && !computedLines.some((l) => l.code === 'UNPAID')) {
+      // Check for unpaid days auto-deduction if no explicit UNPAID rule exists and wage wasn't already prorated
+      if (unpaidDays > 0 && !computedLines.some((l) => l.code === 'UNPAID') && !proration.isProrated) {
         const unpaidDeduction = Math.round((baseWage / 22) * unpaidDays * 100) / 100;
         totalDeductions += unpaidDeduction;
         computedLines.push({
@@ -276,18 +291,19 @@ export class PayrunService {
       const netWage = Math.round((grossWage - totalDeductions) * 100) / 100;
       const payslipId = `ps_${payrunId}_${empId}`;
 
-      // Insert/update payslip
+      // Insert/update payslip with prorated worked days and basic wage
       await query(
         `INSERT INTO payslips 
            (id, payrun_id, employee_id, contract_id, salary_structure_id, period_start, period_end, worked_days, basic_wage, gross_wage, total_deductions, net_wage, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 22, $8, $9, $10, $11, 'Draft')
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'Draft')
          ON CONFLICT (id) DO UPDATE SET
            salary_structure_id = EXCLUDED.salary_structure_id,
+           worked_days = EXCLUDED.worked_days,
            basic_wage = EXCLUDED.basic_wage,
            gross_wage = EXCLUDED.gross_wage,
            total_deductions = EXCLUDED.total_deductions,
            net_wage = EXCLUDED.net_wage`,
-        [payslipId, payrunId, String(empId), String(rawContract.id), String(contractStructId), payrun.period_start, payrun.period_end, baseWage, grossWage, totalDeductions, netWage]
+        [payslipId, payrunId, String(empId), String(rawContract.id), String(contractStructId), payrun.period_start, payrun.period_end, workedDays, baseWage, grossWage, totalDeductions, netWage]
       );
 
       // Clean old payslip lines for recalculation

@@ -35,7 +35,7 @@ export function initWebSocket(server: HttpServer): WebSocketServer {
     // Send initial welcome & connection confirmation
     const welcomeMsg = JSON.stringify({
       type: 'CONNECTED',
-      message: 'PeoplePay360 Real-Time WebSocket Connected',
+      message: 'NextHR Real-Time WebSocket Connected',
       timestamp: new Date().toISOString(),
       activeClients: clients.size,
     });

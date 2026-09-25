@@ -19,6 +19,7 @@ import { useRealtime, AppNotification } from '../context/RealtimeContext';
 import { getNormalizedRole } from './SubNav';
 import { getAiAvatar } from '../lib/avatar';
 import { Logo } from '../components/brand/Logo';
+import { ImpersonationBanner } from '../components/ImpersonationBanner';
 
 export interface NavbarProps {
   onToggleAttendanceWidget?: () => void;
@@ -102,6 +103,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
+      <ImpersonationBanner />
       <header className="w-full sticky top-0 z-40 bg-[#12141F] shadow-[0_4px_20px_rgba(0,0,0,0.25)] border-b border-white/5">
         <div className="h-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex items-center justify-between gap-4">
           

@@ -22,29 +22,14 @@ export interface SalaryRuleDefinition {
   condition_expression?: string | null;
 }
 
+import { safeEvalExpression, safeEvalCondition } from './safe-evaluator.js';
+
 export class RuleEvaluator {
   /**
    * Safely evaluates math expressions including min(), max(), arithmetic operations and context variables
    */
   static evaluateExpression(expr: string, context: EvaluationContext): number {
-    if (!expr || expr.trim() === '') return 0;
-
-    let sanitized = expr;
-    // Replace min and max helper syntax
-    sanitized = sanitized.replace(/min\(([^,]+),([^)]+)\)/gi, 'Math.min($1, $2)');
-    sanitized = sanitized.replace(/max\(([^,]+),([^)]+)\)/gi, 'Math.max($1, $2)');
-
-    try {
-      const keys = Object.keys(context);
-      const values = Object.values(context);
-      // Evaluate mathematical expression passing context keys as variable names
-      const fn = new Function('Math', ...keys, `return (${sanitized});`);
-      const result = fn(Math, ...values);
-      return typeof result === 'number' && !isNaN(result) ? result : 0;
-    } catch (err) {
-      console.error(`RuleEvaluator error evaluating expression [${expr}] -> [${sanitized}]:`, err);
-      return 0;
-    }
+    return safeEvalExpression(expr, context);
   }
 
   /**
@@ -93,15 +78,7 @@ export class RuleEvaluator {
   /**
    * Evaluates boolean conditions (e.g. "OVERTIME_HOURS > 0" or "job_position == 'Store Supervisor'")
    */
-  private static evaluateCondition(condExpr: string, context: EvaluationContext): boolean {
-    try {
-      const keys = Object.keys(context);
-      const values = Object.values(context);
-      const fn = new Function(...keys, `return Boolean(${condExpr});`);
-      return Boolean(fn(...values));
-    } catch (err) {
-      console.error(`RuleEvaluator error evaluating condition [${condExpr}]:`, err);
-      return false; // Safest default is false if condition fails to evaluate
-    }
+  static evaluateCondition(condExpr: string, context: EvaluationContext): boolean {
+    return safeEvalCondition(condExpr, context);
   }
 }

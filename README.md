@@ -1,198 +1,141 @@
-# 🌟 PeoplePay360 — Next-Gen HR & Payroll Operations Platform
+# NextHR — Next-Gen Enterprise HR & Payroll Operations Platform
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18.3-61DAFB.svg?logo=react)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF.svg?logo=vite)](https://vitejs.dev/)
-[![Node.js](https://img.shields.io/badge/Node.js-20.x-339933.svg?logo=node.js)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-4.19-000000.svg?logo=express)](https://expressjs.com/)
-[![WebSocket](https://img.shields.io/badge/WebSocket-Realtime_WS-orange.svg?logo=websocket)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-336791.svg?logo=postgresql)](https://supabase.com/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC.svg?logo=tailwind-css)](https://tailwindcss.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<div align="center">
+  <img src="https://img.shields.io/badge/NextHR-Enterprise%20Edition-4F46E5?style=for-the-badge&logo=shield&logoColor=white" alt="NextHR Edition" />
+  <img src="https://img.shields.io/badge/Architecture-Clean%20Modular%20Monolith-06B6D4?style=for-the-badge&logo=diagram-next&logoColor=white" alt="Architecture" />
+  <img src="https://img.shields.io/badge/Payroll%20Engine-Deterministic%20AST-10B981?style=for-the-badge&logo=calculator&logoColor=white" alt="Engine" />
+  <img src="https://img.shields.io/badge/Real--Time-WebSocket%20Sync-F59E0B?style=for-the-badge&logo=websocket&logoColor=white" alt="WebSocket" />
+  <br /><br />
+  <img src="https://img.shields.io/badge/TypeScript-5.3-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/React-18.3-20232A?style=flat-square&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/Vite-5.4-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/Node.js-20.x-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/Express-4.19-000000?style=flat-square&logo=express&logoColor=white" alt="Express" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Supabase-336791?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="TailwindCSS" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
+</div>
 
-> **PeoplePay360** is a full-stack, enterprise-grade HR & Payroll operations ecosystem built for modern businesses. Designed from the ground up to replace disconnected spreadsheets and legacy software, PeoplePay360 connects **Employee Identity**, **Contracts**, **Working Schedules**, **Live Attendance/Leaves**, **Rule-Driven Payroll Engine**, and **Real-Time WebSocket Synchronization** into one unified, auditable operational flow.
+<br />
 
----
-
-## 📑 Table of Contents
-
-1. [Project Overview & Key Value Propositions](#-project-overview--key-value-propositions)
-2. [High-Level System Architecture](#-high-level-system-architecture)
-3. [Technology Stack](#-technology-stack)
-4. [Real-Time WebSocket Subsystem](#-real-time-websocket-subsystem)
-5. [End-to-End Operational Workflow](#-end-to-end-operational-workflow)
-6. [Core Functional Modules](#-core-functional-modules)
-   - [1. Authentication & 5-Tier RBAC](#1-authentication--5-tier-rbac)
-   - [2. Employee Hub & Contract Management](#2-employee-hub--contract-management)
-   - [3. Attendance & Time-Off Lifecycle](#3-attendance--time-off-lifecycle)
-   - [4. Payroll Calculation Engine & Proration](#4-payroll-calculation-engine--proration)
-   - [5. Payrun Batch Processing & Vector PDF Payslips](#5-payrun-batch-processing--vector-pdf-payslips)
-   - [6. Email Dispatch & Audit Logs](#6-email-dispatch--audit-logs)
-   - [7. Executive Dashboard & Fluid Analytics](#7-executive-dashboard--fluid-analytics)
-   - [8. Modern Landing Page](#8-modern-landing-page)
-7. [Database Schema & Cloud Connectivity](#-database-schema--cloud-connectivity)
-8. [Getting Started & Local Setup](#-getting-started--local-setup)
-9. [Pre-Seeded Credentials & Role Matrix](#-pre-seeded-credentials--role-matrix)
-10. [Automated Testing Suite](#-automated-testing-suite)
-11. [REST API Endpoint Reference](#-rest-api-endpoint-reference)
-12. [Project Directory Layout](#-project-directory-layout)
+> **NextHR** is a mission-critical, enterprise-grade HR & Payroll operations ecosystem built for high-growth modern businesses. Designed to replace disconnected spreadsheets and legacy software, NextHR unifies **Employee Identity**, **Multi-Tier RBAC**, **ServiceNow-Style User Impersonation**, **Immutable Audit Trails**, **Working Schedules**, **Live Biometric Attendance & Leaves**, **AST-Driven Mathematical Payroll Engine**, **Transactional Email Dispatch with PDF Generation**, and **Real-Time WebSocket Synchronization** into one unified, auditable operational flow.
 
 ---
 
-## 💡 Project Overview & Key Value Propositions
+## Table of Contents
 
-Traditional HR and Payroll systems operate in silos: attendance sits in a biometric punch kiosk, leave records live in approval emails, contracts are stored in file cabinets, and payroll is calculated via fragile spreadsheets. This fragmentation leads to:
-- **Calculation Errors**: Missing mid-month hires, unpaid leaves, or overtime in wage proration.
-- **Manual Overhead**: Disjointed exports, imports, and manual email attachments.
-- **Security Vulnerabilities**: Lack of fine-grained role-based access control (RBAC).
-- **Zero Real-Time Visibility**: Finance officers waiting days for batch payroll reconciliations.
-
-**PeoplePay360 solves this with an integrated event-driven architecture**:
-1. **Employee as the Single Source of Truth**: All operational contexts (contracts, shifts, leaves, bank accounts) anchor directly to the employee master record.
-2. **Automated Mathematical Proration Engine**: Automatically calculates calendar-day and working-day proration for mid-month hires, resignations, and unpaid leaves.
-3. **Dynamic Rule Evaluator with AST Execution**: Complex multi-tier salary structures (Basic, HRA, Travel, Performance Bonuses, Provident Fund, Tax brackets) evaluated through configurable mathematical expressions.
-4. **Sub-second Real-Time WebSocket Synchronization**: Multi-tab and multi-user live broadcasts when attendances are clocked, leave requests submitted, or payrun batches processed.
-5. **Production-Ready Seed Dataset**: Over 200 verified employee profiles, active contracts, 6-month compensation history, and attendance records pre-seeded on Supabase PostgreSQL.
+1. [Executive Summary & Core Value Proposition](#1-executive-summary--core-value-proposition)
+2. [What's New in NextHR Enterprise Edition](#2-whats-new-in-nexthr-enterprise-edition)
+3. [System Architecture](#3-system-architecture)
+4. [Real-Time WebSocket Subsystem](#4-real-time-websocket-subsystem)
+5. [End-to-End Operational Lifecycle](#5-end-to-end-operational-lifecycle)
+6. [Core Functional Modules](#6-core-functional-modules)
+   - [Authentication & 5-Tier RBAC Matrix](#authentication--5-tier-rbac-matrix)
+   - [ServiceNow-Style User Impersonation](#servicenow-style-user-impersonation)
+   - [Employee Directory & Contract Overlap Guard](#employee-directory--contract-overlap-guard)
+   - [Attendance Kiosk & Time-Off Lifecycle](#attendance-kiosk--time-off-lifecycle)
+   - [Payroll Engine, Proration & Safe AST Evaluator](#payroll-engine-proration--safe-ast-evaluator)
+   - [Batch Payrun Processing & Vector PDF Payslips](#batch-payrun-processing--vector-pdf-payslips)
+   - [Transactional Email Dispatch Subsystem](#transactional-email-dispatch-subsystem)
+   - [Immutable Audit Trail Inspector](#immutable-audit-trail-inspector)
+   - [Executive Dashboard & Fluid Analytics](#executive-dashboard--fluid-analytics)
+7. [Database Architecture & 16 Production Indexes](#7-database-architecture--16-production-indexes)
+8. [Getting Started & Local Setup](#8-getting-started--local-setup)
+9. [Pre-Seeded Credentials & Role Matrix](#9-pre-seeded-credentials--role-matrix)
+10. [Automated Testing Suite](#10-automated-testing-suite)
+11. [REST API Endpoint Reference](#11-rest-api-endpoint-reference)
+12. [Project Directory Layout](#12-project-directory-layout)
+13. [License & Compliance](#13-license--compliance)
 
 ---
 
-## 🏛 High-Level System Architecture
+## 1. Executive Summary & Core Value Proposition
 
-```mermaid
-flowchart TB
-    subgraph ClientLayer ["Frontend Client Layer (Vite + React 18 + TS)"]
-        UI["Modern UI / Responsive Views"]
-        AuthContext["Auth Context (JWT + RBAC)"]
-        RealtimeCtx["RealtimeContext (WebSocket Client)"]
-        LandingPage["Interactive Landing Page"]
-    end
+Traditional HR and Payroll systems operate in disconnected silos: attendance sits in a physical kiosk, leave requests live in emails, contracts are stored in filing systems, and payroll is calculated via fragile spreadsheets.
 
-    subgraph GatewayLayer ["Networking & Ingestion"]
-        HTTP["Express 4.19 REST API (/api/v1)"]
-        WS["WebSocket Server (/ws)"]
-        Static["Vector Static Assets & PDF Stream"]
-    end
+**NextHR delivers five core architectural pillars**:
+1. **Single Source of Truth**: All operational contexts (contracts, schedules, attendances, leaves, bank accounts) anchor directly to the employee master record.
+2. **Deterministic Mathematical Proration**: Calculates exact calendar-day and working-day wages for mid-month hires, terminations, and unpaid leaves down to the exact cent.
+3. **Safe AST Salary Rule Engine**: Replaces dangerous code-evaluation functions with an isolated mathematical sandbox supporting expressions, caps, and conditional rules.
+4. **ServiceNow-Style User Impersonation**: Allows system administrators to securely test and troubleshoot application state from any user's perspective with full audit logging.
+5. **High-Performance Architecture**: 16 dedicated B-Tree PostgreSQL indexes, connection pooling, and elimination of N+1 database queries to comfortably support thousands of active employees.
 
-    subgraph CoreEngine ["Backend Application Core (Node.js + TS)"]
-        AuthGuard["JWT Auth & Role Guard Middleware"]
-        EmpModule["Identity & Employee Module"]
-        TimeModule["Attendance & Leave Module"]
-        PayrollEngine["Payroll Calculation Engine"]
-        RuleAST["Salary Rule Evaluator"]
-        ProrationEngine["Mid-Month Proration Engine"]
-        PDFGen["PDFKit Vector Generator"]
-        WSBroadcaster["WebSocket Event Broadcaster"]
-    end
+---
 
-    subgraph DataLayer ["Supabase Cloud Database (PostgreSQL)"]
-        DBPool["pg Connection Pool (IPv4 Pooler)"]
-        Tables[("208 Employees, Contracts, Attendances, Payruns, Payslips, Email Logs")]
-    end
+## 2. What's New in NextHR Enterprise Edition
 
-    UI <--> |HTTP Requests| HTTP
-    RealtimeCtx <--> |Bi-directional WS /ws| WS
-    HTTP --> AuthGuard
-    AuthGuard --> EmpModule & TimeModule & PayrollEngine
-    PayrollEngine --> RuleAST & ProrationEngine
-    PayrollEngine --> PDFGen
-    EmpModule & TimeModule & PayrollEngine --> WSBroadcaster
-    WSBroadcaster --> |Broadcast JSON Events| WS
-    EmpModule & TimeModule & PayrollEngine --> DBPool
-    DBPool --> Tables
+- **ServiceNow-Style User Impersonation**: One-click user perspective switching with amber UI status banners, JWT impersonation claims, and anti-admin impersonation protection.
+- **Full Transactional Email System**: Asynchronous SMTP dispatch with retry queue, responsive HTML templates (Welcome, Leave Approved/Rejected, Payslip), and real vector PDF attachments.
+- **Immutable Audit Trail**: Mutation logging across all critical endpoints with actor tracking, timestamps, IP logging, and an interactive before/after JSON diff inspector in the UI.
+- **Safe Formula Evaluator**: Replaces `new Function()` with a sandboxed AST validator supporting `min()`, `max()`, `round()`, `abs()`, and conditional formulas (`WORKED_DAYS >= 20`).
+- **Database Optimization**: 16 production B-Tree indexes, pg connection pooling (`max: 20`, `idleTimeout: 30s`), server-side pagination, and parallelized dashboard analytics.
+- **Security Hardening**: Standard Bcrypt password hashing with backward-compatible auto-migration, strict rate limiting, parameterization against SQL injections, and removal of insecure demo bypasses.
+
+---
+
+## 3. System Architecture
+
+For a deep dive into technical specifications, design patterns, and database tuning, refer to the companion documentation: **[ARCHITECTURE.md](./ARCHITECTURE.md)**.
+
+```
+                           +-----------------------------------+
+                           |      React 18 + Vite Frontend     |
+                           | (TailwindCSS + Lucide Icons + WS) |
+                           +-----------------+-----------------+
+                                             |
+                    REST API (JSON / JWT)    |    WebSocket (ws://)
+                                             v
++----------------------------------------------------------------------------------+
+|                             Express.js Backend Core                              |
+|                                                                                  |
+|  +------------------------+  +------------------------+  +---------------------+ |
+|  |    Identity & Auth     |  |  Impersonation Engine  |  | Rate Limiter & CORS | |
+|  | (Bcrypt + 5-Tier RBAC) |  |  (JWT Claims + Audit)  |  | Security Middleware | |
+|  +-----------+------------+  +-----------+------------+  +----------+----------+ |
+|              |                           |                          |            |
+|  +-----------v---------------------------v--------------------------v----------+ |
+|  |                              Business Services                              | |
+|  |  - Employee & Contract Service (Overlapping Dates Validation)               | |
+|  |  - Attendance & Time-Off Lifecycle Engine                                   | |
+|  |  - Payroll Engine (ProrationEngine + Safe AST Evaluator)                    | |
+|  |  - Immutable Audit Trail Service (Action, Entity, JSON Diffs)               | |
+|  |  - Email Queue & Transporter (Nodemailer + Vector PDF Generator)            | |
+|  +---------------------------------------+-------------------------------------+ |
+|                                          |                                       |
+|  +---------------------------------------v-------------------------------------+ |
+|  |                             Database Layer                                  | |
+|  |  - pg.Pool (Max: 20 connections, idleTimeout: 30s)                          | |
+|  |  - Supabase IPv4 Transaction Pooler Auto-Routing                            | |
+|  +---------------------------------------+-------------------------------------+ |
++------------------------------------------+---------------------------------------+
+                                           |
+                                           v
+                          +----------------------------------+
+                          |      PostgreSQL (Supabase)       |
+                          |   16 Production B-Tree Indexes   |
+                          |  Relational Integrity & Schemas  |
+                          +----------------------------------+
 ```
 
 ---
 
-## 🛠 Technology Stack
+## 4. Real-Time WebSocket Subsystem
 
-### Frontend
-| Layer / Tech | Purpose | Details |
-| :--- | :--- | :--- |
-| **React 18.3** | View Engine | Functional components with Hooks, Concurrent Mode ready |
-| **TypeScript 5.3** | Static Typing | Strict mode enabled, zero `any` across business domains |
-| **Vite 5.4** | Bundler & Dev Server | Ultra-fast HMR, Rollup optimized code splitting |
-| **Tailwind CSS 3.4** | Design Tokens | Custom HSL violet-indigo fintech palette (`#4F46E5`, `#5B4FE9`) |
-| **Lucide React** | Vector Iconography | Clean, consistent enterprise icon system |
-| **HTML5 Canvas / CSS 3D** | Interactive Visuals | Particle simulation, tilted 3D hero showcase, interactive AST slider |
+The WebSocket server is mounted alongside Express on `ws://localhost:3000/ws` with a 30-second ping/pong heartbeat protocol and exponential-backoff client reconnection.
 
-### Backend
-| Layer / Tech | Purpose | Details |
-| :--- | :--- | :--- |
-| **Node.js (v20+)** | Runtime Environment | High-performance asynchronous event loop |
-| **Express 4.19** | HTTP Application Framework | Modular route controllers, input validation, CORS security |
-| **TypeScript / `tsx`** | Backend Typing & Execution | Native execution without build steps during development |
-| **`ws` (WebSocket)** | Real-Time Engine | RFC 6455 compliant persistent WebSocket server mounted at `/ws` |
-| **`pg` (node-postgres)** | Database Driver | High-throughput connection pooling with SSL support |
-| **`pdfkit`** | Document Generation | Programmatic vector PDF payslips with exact table layouts |
-| **`jsonwebtoken`** | Authentication | Stateless HMAC-SHA256 JWT tokens with role claims |
+### Event Types & Payloads
 
-### Database & Cloud
-| Technology | Details |
-| :--- | :--- |
-| **Supabase PostgreSQL** | Cloud-hosted relational database (`aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres`) |
-| **Relational Integrity** | Foreign keys, cascading deletes, `TIMESTAMP WITH TIME ZONE`, `NUMERIC(12, 2)` currencies |
-| **Automatic Schema DDL** | Idempotent `initDb()` bootstrap executes migrations and creates tables on startup |
-
----
-
-## ⚡ Real-Time WebSocket Subsystem
-
-PeoplePay360 features a built-in, production-grade WebSocket engine that enables multi-client real-time synchronization without manual polling or page reloads.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor HR as HR Payroll Manager (Tab A)
-    participant WS as Backend WebSocket (/ws)
-    actor Emp as Employee (Tab B)
-
-    HR->>WS: Process Payrun (POST /api/payroll/payruns/pr_1/validate)
-    Note over WS: PayrollController executes PayrunService<br/>and generates Payslips
-    WS-->>HR: HTTP 200 OK (Payrun Validated)
-    WS->>WS: broadcastEvent(PAYROLL_UPDATE)
-    WS-->>HR: WS Broadcast { type: 'PAYROLL_UPDATE', action: 'PAYRUN_VALIDATED' }
-    WS-->>Emp: WS Broadcast { type: 'PAYROLL_UPDATE', notification: 'Payrun Validated' }
-    Note over Emp: RealtimeContext receives event,<br/>displays toast notification,<br/>and triggers auto-refresh of Payslip table
-```
-
-### 1. Connection Architecture
-- The WebSocket server is mounted directly alongside Express on the same HTTP server at `ws://localhost:3000/ws`.
-- **Heartbeat Protocol**: A 30-second ping/pong cycle automatically prunes stale or disconnected clients.
-- **Auto-Reconnection**: The client-side `RealtimeContext` employs an exponential-backoff reconnection loop if the network connection is interrupted.
-
-### 2. Event Types & Payloads
 | Event Type | Trigger | Broadcast Action & Payload |
 | :--- | :--- | :--- |
 | `PAYROLL_UPDATE` | Salary rule saved, payrun created, validated, or marked paid | Payrun summary, toast notification with status badge |
-| `ATTENDANCE_UPDATE` | Web kiosk punch check-in, check-out, or manual correction | Employee ID, check-in timestamp, worked minutes |
+| `ATTENDANCE_UPDATE` | Web kiosk punch check-in, check-out, or manual adjustment | Employee ID, check-in timestamp, worked minutes |
 | `TIMEOFF_UPDATE` | Leave request submitted, approved, or rejected | Allocation remaining days, approval officer ID |
 | `EMPLOYEE_UPDATE` | Employee profile edited, contract status changed | Full employee entity payload |
-| `NOTIFICATION` | System-wide announcements, compliance reminders | In-app notification bell entry |
-
-### 3. Client-Side Subscription Hook
-Components subscribe to specific events effortlessly using the custom `useRealtimeSubscription` hook:
-
-```tsx
-import { useRealtimeSubscription } from '@/context/RealtimeContext';
-
-export const PayrunsListPage = () => {
-  const [payruns, setPayruns] = useState([]);
-
-  // Auto-refetches the list whenever any user updates payroll
-  useRealtimeSubscription('PAYROLL_UPDATE', (event) => {
-    console.log('Realtime event received:', event);
-    fetchPayruns();
-  });
-
-  return (/* JSX */);
-};
-```
+| `NOTIFICATION` | System announcements, compliance reminders | In-app notification badge entry |
 
 ---
 
-## 🔄 End-to-End Operational Workflow
-
-PeoplePay360 models the complete employee lifecycle from recruitment to salary disbursement:
+## 5. End-to-End Operational Lifecycle
 
 ```mermaid
 graph TD
@@ -200,101 +143,101 @@ graph TD
     B --> C[3. Working Schedule Assignment]
     C --> D[4. Daily Attendance & Time-Off Tracking]
     D --> E[5. Payrun Generation - Select Period & Employees]
-    E --> F[6. Mathematical Proration & Salary Rule AST Computation]
+    E --> F[6. Mathematical Proration & Safe AST Rule Evaluation]
     F --> G[7. Two-Step Verification - Draft to Validated to Paid]
-    G --> H[8. Instant Vector PDF Generation & Email Dispatch]
-    H --> I[9. Financial Reconciliation & Executive Dashboard]
+    G --> H[8. Instant Vector PDF Generation & Bulk Email Dispatch]
+    H --> I[9. Audit Trail Logging & Executive Analytics]
 ```
 
-### The Standard Scenario (e.g., Amara Chen)
-1. **Onboarding**: Amara Chen is created under the `dept_sales` department with job title *Sales Associate*.
-2. **Contracting**: Active contract `CNT-2026-001` is attached with a base wage of `$4,500.00/mo` and salary structure `struct_3` (*Sales & Performance*).
-3. **Working Schedule**: Attached to standard 40h/week schedule (`sched_std_40h`, Mon–Fri 9 AM – 5 PM).
-4. **Attendance & PTO**: Amara clocks in daily via the Attendance Widget. PTO leave request of 3 days is approved by HR.
-5. **Payrun Generation**: HR Payroll Officer opens September 2026 Payrun. The system scans eligible active contracts, evaluates rules (`BASIC`, `COMM`, `TA`, `PF`, `TAX`), applies proration if applicable, and computes Net Salary.
-6. **Delivery**: The payrun is validated. An auditable PDF payslip is compiled, and batch email dispatch logs records into `email_logs`.
-
 ---
 
-## 🧩 Core Functional Modules
+## 6. Core Functional Modules
 
-### 1. Authentication & 5-Tier RBAC
-Enforced both client-side (route guards) and server-side (middleware validation):
+### Authentication & 5-Tier RBAC Matrix
+NextHR implements a strict role hierarchy enforced across client-side route guards and server-side middleware:
 
-| Role | HR Modules (Employees, Contracts, Attendance) | Salary Structures & Rules | Payruns & Payslips | User & Role Management | Executive Dashboard |
+| Role | HR & Contracts | Salary Structures & Rules | Payruns & Payslips | User Management & Audit | Impersonation |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Admin** | Full CRUD | Full CRUD | Full CRUD | Full Access | Full Access |
-| **HR Payroll Manager** | Full CRUD | Full CRUD | Full CRUD | No Access | Full Access |
-| **HR Payroll User** | Full CRUD | Read-Only | Create, Read, Update | No Access | View Only |
-| **HR Manager** | Full CRUD | No Access | Blocked | No Access | No Access |
-| **Employee** | Own profile & leaves only | No Access | No Access | No Access | No Access |
+| **Admin** | Full CRUD | Full CRUD | Full CRUD | Full Access | Yes (Non-Admins) |
+| **HR Payroll Manager** | Full CRUD | Full CRUD | Full CRUD | View Only | No |
+| **HR Payroll User** | Full CRUD | Read-Only | Create, Read, Update | No Access | No |
+| **HR Manager** | Full CRUD | No Access | Blocked | No Access | No |
+| **Employee** | Own Profile Only | No Access | Own Payslips Only | No Access | No |
 
-### 2. Employee Hub & Contract Management
-- **Dual View Modes**: Switch between a responsive Kanban card layout and high-density data grid.
-- **Contract Safety Guard**: Strictly enforces that an employee can have only **one** active (`running`) contract at any given time, preventing duplicate salary disbursements.
-- **Profile Customization**: Users can update personal details, emergency contacts, bank IFSC/account numbers, and choose from curated AI/Vector avatars.
+### ServiceNow-Style User Impersonation
+- **One-Click Experience**: Administrators can click "Impersonate" from the Employee Kanban card or List view.
+- **Session Banner**: An amber, high-contrast banner appears at the top of the interface displaying the target user and active role, with an instant "End Session" action.
+- **Full Traceability**: All actions taken while impersonating record both the target user and the impersonator's user ID in the audit trail.
+- **Security Rule**: Administrators cannot impersonate other administrators.
 
-### 3. Attendance & Time-Off Lifecycle
-- **Interactive Check-In / Check-Out Widget**: Real-time counter calculating worked hours, overtime, and break intervals.
-- **Multi-Type Time Off**: Paid Time Off (PTO), Sick Leave, Parental Leave, and Unpaid Leave with individual balance tracking.
-- **Approval Workflow**: Pending requests are flagged for HR Managers and HR Payroll Users with one-click *Approve* or *Refuse* actions and automatic leave balance reconciliation.
+### Employee Directory & Contract Overlap Guard
+- **Dual View Modes**: Switch seamlessly between Kanban cards and dense data tables.
+- **Contract Overlap Guard**: Validates that no employee can have overlapping active contracts, preventing duplicate wage disbursements.
+- **Structured Working Schedules**: Dynamic assignment of 40-hour or custom shift schedules.
 
-### 4. Payroll Calculation Engine & Proration
-The engine calculates exact gross and net wages using sequential rule evaluation:
-- **Computation Methods**:
-  - `Fixed`: Exact dollar amounts (e.g., Base Wage = `$4,500.00`).
-  - `Percentage`: Percentage of base or gross (e.g., HRA = `40%`, PF = `12%`).
-  - `Formula`: Dynamic expression evaluation (e.g., `BASIC * 0.10 + 250`).
+### Attendance Kiosk & Time-Off Lifecycle
+- **Real-Time Kiosk**: Interactive check-in/out button calculating active working hours and overtime against standard schedules.
+- **Multi-Type Leave Quotas**: PTO, Sick Leave, Parental, and Unpaid Leave with automatic quota deduction.
+- **Approval Workflow**: Managers approve or refuse with one click; status changes trigger automated email notifications and WebSocket updates.
+
+### Payroll Engine, Proration & Safe AST Evaluator
 - **Proration Engine**:
-  - Handles mid-month joining dates:
+  - Mid-month onboarding proration:
     $$\text{Prorated Wage} = \text{Wage} \times \left(\frac{\text{Eligible Working Days}}{\text{Total Working Days in Month}}\right)$$
-  - Handles unpaid leaves by deducting proportional daily rates.
+  - Deducts proportional daily rates for approved unpaid leave days.
+- **Safe Mathematical Evaluator**:
+  - Replaces `eval()` and `new Function()` with a sandboxed parser.
+  - Supports arithmetic (`+`, `-`, `*`, `/`), math functions (`min`, `max`, `round`, `abs`), and conditional checks (`WORKED_DAYS >= 20`).
 
-### 5. Payrun Batch Processing & Vector PDF Payslips
-- **Two-Step Wizard**: Create Draft Payrun $\rightarrow$ Review & Compute $\rightarrow$ Validate $\rightarrow$ Release / Mark as Paid.
-- **Vector PDF Generator**: Generates high-fidelity, printable PDF payslips with company branding, employee details, earnings breakdown, statutory deductions, and net wage summary.
+### Batch Payrun Processing & Vector PDF Payslips
+- **Multi-Step Payrun Flow**: `Draft` -> `Computed` -> `Validated` -> `Paid`.
+- **Vector PDF Generator**: Generates high-fidelity, printable PDF payslips complete with company branding, employee details, earnings breakdown, statutory deductions, net payable, and verification QR code.
 
-### 6. Email Dispatch & Audit Logs
-- Automatically dispatches payslips to employee emails upon payrun approval.
-- Every outgoing email is logged in PostgreSQL with recipient, timestamp, status (`Sent` / `Failed`), and error diagnostics.
+### Transactional Email Dispatch Subsystem
+- **SMTP & Queue Engine**: Built with Nodemailer with in-memory retry queue and persistent logging in `email_logs`.
+- **Automated Dispatches**:
+  - Employee Welcome & Onboarding Email.
+  - Leave Request Approved/Rejected Notice.
+  - Bulk Payslip Notification with attached Vector PDF.
 
-### 7. Executive Dashboard & Fluid Analytics
-- **Fluid Glass Trend Chart**: Smooth SVG Bézier curve visualization showing 6-month historical net salary fund trajectories with interactive glassmorphism tooltips.
-- **Cost by Department Donut**: Dynamic SVG donut chart breaking down organizational spend across Engineering, Sales, HR, and Finance.
-- **Real-Time Stat Counters**: Active employee headcount, running monthly liability, average salary, and pending payruns.
+### Immutable Audit Trail Inspector
+- Real-time logging of all critical mutations across Employees, Contracts, Leave Requests, Payruns, and Impersonation sessions.
+- Administrative Audit Trail viewer with search, action filters, date range selection, and interactive JSON diff inspector.
 
-### 8. Modern Landing Page
-- **Light Theme**: Clean, professional design system (`#F8F9FD` canvas, `#5B4FE9` accent).
-- **3D Tilted Dashboard Preview**: Perspective-transformed live dashboard mockup showcasing metrics, graphs, and transaction tables.
-- **18-Second Code-Simulated Demo Video**: Interactive, choreographed viewport simulating automated payrun validation and PDF generation with zero external video dependencies.
-- **3x3 Bento Grid**: Interactive AST formula slider, live punch-clock biometric simulator, vector payslip card, and security overview.
-
----
-
-## 🗄 Database Schema & Cloud Connectivity
-
-PeoplePay360 connects to a high-availability Supabase PostgreSQL database:
-- **Connection Host**: `aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres`
-- **Fallback Engine**: The backend's `db.ts` automatically converts legacy direct connection strings to the IPv4 transaction pooler host, ensuring seamless connections across all OS environments.
-- **Auto-Migrations**: The `initDb()` routine runs on server boot, guaranteeing all required tables, columns, indexes, and initial records exist.
-
-### Core Tables
-1. `users` — Authentication credentials, role bindings, avatar URLs.
-2. `roles` — RBAC permission tier definitions.
-3. `employees` — Master records, contact info, job position, department link.
-4. `departments` — Department hierarchy, codes (`ENG`, `SALES`, `HR`, `FIN`).
-5. `contracts` — Employment terms, wage, salary structure ID, running/closed status.
-6. `working_schedules` & `working_schedule_days` — Shift hours and break allocations.
-7. `time_off_types`, `time_off_allocations`, `time_off_requests` — Leave management.
-8. `attendances` — Clock-in/out timestamps, worked hours, manual adjustments.
-9. `salary_structures` & `salary_rules` — Mathematical computation rules.
-10. `payruns` & `payslips` & `payslip_lines` — Processed payroll records.
-11. `email_logs` — Payslip delivery tracking.
-12. `audit_logs` — Traceable mutation log for security compliance.
+### Executive Dashboard & Fluid Analytics
+- **Salary Trajectory Chart**: 6-month historical net salary fund trajectory with interactive glassmorphism tooltips.
+- **Cost by Department Breakdown**: Dynamic SVG donut chart breaking down organizational expenditures.
+- **Live Metrics**: Headcount, active payruns, monthly payroll liabilities, and pending approvals.
 
 ---
 
-## 🚀 Getting Started & Local Setup
+## 7. Database Architecture & 16 Production Indexes
+
+NextHR connects to Supabase PostgreSQL using an IPv4 transaction pooler host with 16 production B-Tree indexes:
+
+```sql
+-- High-Traffic Performance Indexes
+CREATE INDEX idx_employees_department ON employees (department_id);
+CREATE INDEX idx_employees_status ON employees (status);
+CREATE INDEX idx_employees_email ON employees (work_email);
+CREATE INDEX idx_contracts_employee ON contracts (employee_id);
+CREATE INDEX idx_contracts_status ON contracts (status);
+CREATE INDEX idx_attendances_employee_date ON attendances (employee_id, attendance_date);
+CREATE INDEX idx_attendances_checkin ON attendances (check_in);
+CREATE INDEX idx_timeoff_requests_employee ON time_off_requests (employee_id);
+CREATE INDEX idx_timeoff_requests_status ON time_off_requests (status);
+CREATE INDEX idx_payslips_payrun ON payslips (payrun_id);
+CREATE INDEX idx_payslips_employee ON payslips (employee_id);
+CREATE INDEX idx_payslip_lines_payslip ON payslip_lines (payslip_id);
+CREATE INDEX idx_users_email ON users (email);
+CREATE INDEX idx_users_employee ON users (employee_id);
+CREATE INDEX idx_audit_logs_record ON audit_logs (record_id);
+CREATE INDEX idx_audit_logs_created_at ON audit_logs (created_at DESC);
+```
+
+---
+
+## 8. Getting Started & Local Setup
 
 ### Prerequisites
 - **Node.js**: v18.0.0 or v20.x+
@@ -303,21 +246,27 @@ PeoplePay360 connects to a high-availability Supabase PostgreSQL database:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/Dhruv4848l/Odoo-2026-Final.git
-cd Odoo-2026-Final
+git clone https://github.com/vinnu112p/NexHR.git
+cd NexHR
 ```
 
 ### 2. Environment Configuration
-The repository includes `.env.example` templates that connect directly to the shared Supabase cloud database.
 
 **Backend Configuration (`backend/.env`):**
 ```env
 PORT=3000
 NODE_ENV=development
-JWT_SECRET=peoplepay360-dev-secret-key-2026
+JWT_SECRET=nexhr-production-secret-key-2026
 
-# Supabase PostgreSQL Connection Pooler
-DATABASE_URL="postgresql://postgres.iejfvpcbkulrbzkfbdfu:%24OdooHackathon420@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres"
+# Supabase PostgreSQL Connection Pooler (Auto-routed by db.ts)
+DATABASE_URL="postgresql://postgres.lxhnzekslxadgdatnuar:[PASSWORD]@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+
+# Optional SMTP Configuration (Default: Console fallback)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=notifications@nexhr.internal
+SMTP_PASS=your-app-password
+SMTP_FROM="NextHR Platform <notifications@nexhr.internal>"
 ```
 
 **Frontend Configuration (`frontend/.env`):**
@@ -340,163 +289,140 @@ npm install
 ```
 
 ### 4. Start Development Servers
-Open two terminal windows:
 
 **Terminal 1 — Backend (Port 3000 & WebSocket /ws):**
 ```bash
 cd backend
 npm run dev
 ```
-> Output confirms: `⚡ [WebSocket] Real-time engine mounted at /ws` and `Server listening on port 3000`.
 
 **Terminal 2 — Frontend (Port 5173):**
 ```bash
 cd frontend
 npm run dev
 ```
-> Access the application at **`http://localhost:5173`**.
+
+Open **`http://localhost:5173`** in your browser.
 
 ---
 
-## 🔑 Pre-Seeded Credentials & Role Matrix
+## 9. Pre-Seeded Credentials & Role Matrix
 
-The Supabase cloud database is populated with **208 active employees** and accounts. You can log in using any of the following credentials (all use password: `password123`):
+The database is pre-seeded with accounts for each role tier (all use password: `password123`):
 
 | Role | Email Address | Password | Intended Screen Experience |
 | :--- | :--- | :--- | :--- |
-| **System Admin** | `admin@peoplepay360.com` | `password123` | Unrestricted access across all modules & settings |
-| **HR Payroll Manager** | `payroll@peoplepay360.com` | `password123` | Full HR operations + Salary Rule authoring + Payruns |
-| **HR Payroll User** | `hr.payroll@peoplepay360.com` | `password123` | Daily HR + Payrun processing (read-only rules) |
-| **HR Manager** | `hr.manager@peoplepay360.com` | `password123` | Full HR, Attendance & Leave approval (Payroll locked) |
-| **Employee** | `amara.chen@peoplepay360.com` | `password123` | Self-service attendance kiosk, PTO requests, own payslips |
+| **System Admin** | `admin@nexthr.com` | `password123` | Unrestricted access across all modules, Audit Logs & Impersonation |
+| **HR Payroll Manager** | `payroll@nexthr.com` | `password123` | Full HR operations + Salary Rule authoring + Payrun computation |
+| **HR Payroll User** | `payroll.user@nexthr.com` | `password123` | Daily HR + Payrun processing (read-only rules) |
+| **HR Manager** | `hr.manager@nexthr.com` | `password123` | Full HR, Attendance & Leave approvals (Payroll locked) |
+| **Employee** | `amara.chen@nexthr.com` | `password123` | Self-service attendance kiosk, PTO requests, personal payslips |
 
-> 💡 **Quick Login Tip**: The Login page features a slide-out **"Demo Credentials Drawer"** allowing one-click auto-fill for all five testing accounts.
+*Note: The login screen contains an integrated credentials reference drawer with one-click copy.*
 
 ---
 
-## 🧪 Automated Testing Suite
+## 10. Automated Testing Suite
 
-The backend includes automated unit test suites for the Payroll Rule Evaluator and Proration Engine:
+The backend test suite covers the mathematical rule evaluator, safety sandbox, and proration engine:
 
 ```bash
 cd backend
 npm test
 ```
 
-### Test Coverage Highlights:
-- **Rule Evaluator**:
-  - `Fixed` rule addition ($4,500 basic).
-  - `Percentage` calculations (HRA 40%, PF 12%).
-  - Capped maximum/minimum contribution boundaries.
-  - Complex mathematical formulas with variable references.
-- **Proration Engine**:
-  - Full-month standard calculations (no deduction).
-  - Mid-month onboarding date proration (e.g., hire date on 15th of month).
-  - Deductions for unpaid leave occurrences against standard working days.
+### Test Highlights:
+- **Rule Evaluator**: Fixed additions, percentage rules (HRA 40%), capped contribution rules (PF 12% capped at $1800), and custom mathematical formulas.
+- **Condition Evaluation**: Conditional salary components (`WORKED_DAYS >= 20`).
+- **Safety Sandbox**: Blocks unauthorized tokens (`process`, `require`, `eval`, `constructor`).
+- **Proration Engine**: Full month, mid-month hire proration, and unpaid leave deductions.
 
 ---
 
-## 📡 REST API Endpoint Reference
+## 11. REST API Endpoint Reference
 
-### Authentication & Employee Identity
-- `POST /api/v1/auth/login` — Authenticate and receive JWT token with role claims.
+### Authentication & Impersonation
+- `POST /api/v1/auth/login` — Authenticate and receive JWT token.
 - `GET /api/v1/auth/me` — Fetch current user context and permissions.
-- `GET /api/v1/employees` — Paginated list of employees with search and department filters.
-- `POST /api/v1/employees` — Create a new employee master record.
-- `PUT /api/v1/employees/:id` — Update employee profile and banking details.
+- `POST /api/v1/auth/impersonate` — *(Admin only)* Start user impersonation session.
+- `POST /api/v1/auth/end-impersonate` — Terminate impersonation and restore admin session.
+- `GET /api/v1/audit-logs` — *(Admin only)* Retrieve paginated immutable audit logs.
+
+### Employee & Contract Operations
+- `GET /api/v1/employees` — Paginated list of employees with search and department filtering.
+- `POST /api/v1/employees` — Create new employee (triggers welcome email and audit log).
+- `PUT /api/v1/employees/:id` — Update employee profile and bank details.
 - `GET /api/v1/contracts` — List active and archived contracts.
-- `POST /api/v1/contracts` — Issue a new employment contract.
+- `POST /api/v1/contracts` — Issue a new contract (with overlap validation).
 
 ### Attendance & Leaves
-- `GET /api/v1/attendance` — Fetch attendance records and daily punches.
+- `GET /api/v1/attendance` — Paginated attendance records.
 - `POST /api/v1/attendance/check-in` — Register clock-in timestamp.
 - `POST /api/v1/attendance/check-out` — Register clock-out timestamp.
 - `GET /api/v1/timeoff/requests` — List leave requests with approval status.
 - `POST /api/v1/timeoff/requests` — Submit leave request.
-- `PATCH /api/v1/timeoff/requests/:id/approve` — Approve pending time off.
+- `POST /api/v1/timeoff/requests/:id/approve` — Approve leave (sends email & WebSocket event).
+- `POST /api/v1/timeoff/requests/:id/refuse` — Reject leave (sends email & WebSocket event).
 
-### Payroll Operations
-- `GET /api/v1/payroll/structures` — List all configured salary structures.
+### Payroll & Payslips
+- `GET /api/v1/payroll/structures` — List configured salary structures.
 - `POST /api/v1/payroll/structures` — Create a new salary structure.
-- `POST /api/v1/payroll/rules` — Add a salary computation rule.
-- `GET /api/v1/payroll/payruns` — Fetch all monthly payrun batches.
-- `POST /api/v1/payroll/payruns` — Initialize a new payrun calculation.
+- `GET /api/v1/payroll/payruns` — Fetch monthly payrun batches.
+- `POST /api/v1/payroll/payruns` — Initialize and compute a new payrun.
 - `PATCH /api/v1/payroll/payruns/:id/validate` — Validate draft payrun.
-- `PATCH /api/v1/payroll/payruns/:id/pay` — Mark payrun as paid (releases bank funds).
-- `GET /api/v1/payroll/payslips/:id/pdf` — Stream generated vector PDF payslip.
-- `POST /api/v1/payroll/payruns/:id/send-payslips` — Trigger bulk email delivery.
-
-### Reporting & Analytics
-- `GET /api/v1/dashboard/overview` — High-level KPI summary cards.
-- `GET /api/v1/dashboard/salary-trend` — 6-month historical net salary expenditure.
-- `GET /api/v1/dashboard/cost-by-department` — Spend breakdown by department.
+- `PATCH /api/v1/payroll/payruns/:id/pay` — Mark payrun as paid.
+- `GET /api/v1/payroll/payslips/:id/pdf` — Stream high-fidelity vector PDF payslip.
+- `POST /api/v1/payroll/payruns/:id/send-payslips` — Bulk email payslips with PDF attachments.
 
 ---
 
-## 📂 Project Directory Layout
+## 12. Project Directory Layout
 
 ```text
-PeoplePay360/
-├── backend/                             # Express + Node.js + WebSocket Backend
+NextHR/
+├── backend/
 │   ├── src/
-│   │   ├── core/                        # DB pool, Auth middleware, WebSocket server
-│   │   │   ├── auth.ts                  # JWT token verification & role guards
-│   │   │   ├── db.ts                    # PostgreSQL pool connection & initDb DDL
-│   │   │   └── websocket.ts             # RFC 6455 WebSocket engine & broadcaster
+│   │   ├── core/
+│   │   │   ├── db.ts               # Connection pool & query helpers
+│   │   │   ├── schema.ts           # DDL & database structure
+│   │   │   ├── seed.ts             # Initial master seed data
+│   │   │   ├── audit.ts            # Immutable audit logging engine
+│   │   │   ├── email.ts            # Transporter & queue dispatch
+│   │   │   ├── email-templates.ts  # HTML email layout generators
+│   │   │   ├── auth.ts             # JWT signing & verification middleware
+│   │   │   ├── websocket.ts        # Real-time WebSocket event broadcaster
+│   │   │   └── pdf-generator.ts    # Vector PDF payslip builder
 │   │   ├── modules/
-│   │   │   ├── identity-employee/       # Employee master, contracts, schedules
-│   │   │   ├── attendance-timeoff/      # Clock-in/out, leave allocations & requests
-│   │   │   ├── payroll-engine/          # Payrun wizard, salary rules, AST evaluator
-│   │   │   │   ├── services/
-│   │   │   │   │   ├── rule-evaluator.service.ts
-│   │   │   │   │   ├── proration-engine.service.ts
-│   │   │   │   │   ├── pdf-generator.service.ts
-│   │   │   │   │   └── payslip.service.ts
-│   │   │   │   └── payroll.controller.ts
-│   │   │   └── reporting-platform/      # Analytics, trends, department cost APIs
-│   │   ├── scripts/                     # Reproducible seeding utilities
-│   │   │   ├── seed_200_users.ts
-│   │   │   ├── seed_dashboard_payroll.ts
-│   │   │   └── seed_trend_history.ts
-│   │   └── server.ts                    # Application bootstrap & route registration
-│   ├── tests/                           # Automated unit test suites
-│   ├── package.json
-│   └── tsconfig.json
+│   │   │   ├── identity/           # Users, RBAC, impersonation, audit routes
+│   │   │   ├── employee-mgmt/      # Employees, departments, contracts
+│   │   │   ├── time-attendance/    # Punches, shifts, leave requests
+│   │   │   ├── payroll-engine/     # Payruns, payslips, rule evaluator, proration
+│   │   │   └── dashboard/          # Aggregated executive analytics
+│   │   └── server.ts               # Application entry point
+│   └── tests/                      # Unit & integration test suites
 │
-├── frontend/                            # Vite + React 18 + Tailwind Frontend
+├── frontend/
 │   ├── src/
-│   │   ├── components/                  # Reusable UI library & brand marks
-│   │   │   ├── brand/Logo.tsx           # Continuous 360° gradient vector logo
-│   │   │   ├── ui/                      # Badge, Button, Card, Input, Pagination
-│   │   │   └── UserProfileModal.tsx     # Profile & avatar selector modal
-│   │   ├── context/                     # Global state providers
-│   │   │   ├── AuthContext.tsx          # Session persistence & RBAC permissions
-│   │   │   └── RealtimeContext.tsx      # WebSocket client & event subscriptions
-│   │   ├── features/                    # Domain-driven feature modules
-│   │   │   ├── landing/                 # Modern landing page & interactive showcases
-│   │   │   │   ├── components/          # Hero, Ecosystem, Demo Video, Bento Grid
-│   │   │   │   └── pages/LandingPage.tsx
-│   │   │   ├── auth-employee/           # Login, Employee Kanban/List, Contracts
-│   │   │   ├── attendance-timeoff/      # Punch Widget, Attendance list, PTO overview
-│   │   │   ├── payroll/                 # Payrun processing wizard, Salary structures
-│   │   │   └── dashboard-reports/       # Executive dashboard, Fluid glass charts
-│   │   ├── layouts/                     # Primary top navigation & secondary sub-nav
-│   │   ├── lib/avatar.ts                # Avatar asset registry & fallback engine
-│   │   ├── routes.config.tsx            # Protected route declarations
-│   │   └── App.tsx                      # Root application wrapper
-│   ├── tailwind.config.js               # Theme colors, gradients, custom shadows
-│   ├── vite.config.ts                   # Proxy configuration & plugins
-│   └── package.json
-│
-├── database/                            # Reference migrations and seeds
-├── docs/                                # Project documentation assets
-├── README.md                            # Comprehensive Engineering Guide
-└── package.json                         # Monorepo root scripts
+│   │   ├── components/             # Shared UI components (Banner, Navbar, SubNav, Logo)
+│   │   ├── context/                # AuthContext (with Impersonation state)
+│   │   ├── features/
+│   │   │   ├── audit/              # Audit Trail Page & JSON Diff Inspector
+│   │   │   ├── employee/           # Kanban, Employee Detail, Create Wizard
+│   │   │   ├── contract/           # Contract creation & timeline management
+│   │   │   ├── attendance/         # Check-in/out kiosk & punch history
+│   │   │   ├── timeoff/            # Leave calendar, quotas & approval dashboard
+│   │   │   ├── payroll/            # Payrun wizard, batch computing, payslip PDF view
+│   │   │   ├── dashboard/          # Real-time charts, KPIs & activity feeds
+│   │   │   └── landing/            # Modern corporate landing page & 3D canvas
+│   │   └── services/               # Axios API client & WebSocket listeners
+│   └── index.html
+├── ARCHITECTURE.md                 # Technical specification & architecture design
+└── README.md                       # Main project documentation & setup guide
 ```
 
 ---
 
-## 📄 License & Credits
+## 13. License & Compliance
 
-Built with ❤️ for the **Odoo 2026 Hackathon**.  
-Released under the **MIT License**.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+All operational modules adhere to statutory tax calculations, data immutability, and 5-tier role-based access control guidelines.

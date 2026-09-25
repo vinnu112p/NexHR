@@ -15,7 +15,7 @@ export const SecurityRBACSection: React.FC = () => {
       tier: 'TIER 5',
       badge: 'Full Root Access',
       badgeStatus: 'active' as const,
-      email: 'admin@peoplepay.com',
+      email: 'admin@nexthr.com',
       rights: [
         'Full System Configuration & Cloud DB Authority',
         'User Account & Privilege Role Assignments',
@@ -29,7 +29,7 @@ export const SecurityRBACSection: React.FC = () => {
       tier: 'TIER 4',
       badge: 'Rule Engine Authority',
       badgeStatus: 'active' as const,
-      email: 'payroll.manager@peoplepay.com',
+      email: 'payroll.manager@nexthr.com',
       rights: [
         'Full Payroll & Payrun Batch Authority',
         'Salary Structures, Rules & Pythonic Formula Engine',
@@ -43,7 +43,7 @@ export const SecurityRBACSection: React.FC = () => {
       tier: 'TIER 3',
       badge: 'Payrun Executor',
       badgeStatus: 'info' as const,
-      email: 'payroll.user@peoplepay.com',
+      email: 'payroll.user@nexthr.com',
       rights: [
         'Create, Compute & Confirm Monthly Payruns',
         'Generate, Print & Email Verified Bulk Payslips',
@@ -60,7 +60,7 @@ export const SecurityRBACSection: React.FC = () => {
       tier: 'TIER 2',
       badge: 'People Ops Only',
       badgeStatus: 'info' as const,
-      email: 'hr.manager@peoplepay.com',
+      email: 'hr.manager@nexthr.com',
       rights: [
         'Full CRUD on Employees, Contracts & Schedules',
         'Review & Approve Leave Allocations and Time Off',
@@ -77,7 +77,7 @@ export const SecurityRBACSection: React.FC = () => {
       tier: 'TIER 1',
       badge: 'Self-Service Scoped',
       badgeStatus: 'warning' as const,
-      email: 'amara.chen@peoplepay.com',
+      email: 'amara.chen@nexthr.com',
       rights: [
         'View Own Profile, Contract & Wage Details',
         'Biometric Kiosk Punch (Check-In / Out)',

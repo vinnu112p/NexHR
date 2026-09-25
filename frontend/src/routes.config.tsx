@@ -15,6 +15,7 @@ import { PayrunsListPage } from './features/payroll/pages/PayrunsListPage';
 import { PayrunProcessingPage } from './features/payroll/pages/PayrunProcessingPage';
 import { SalaryStructuresPage } from './features/payroll/pages/SalaryStructuresPage';
 import { LandingPage } from './features/landing/pages/LandingPage';
+import { AuditTrailPage } from './features/audit/pages/AuditTrailPage';
 import { payrollRoutes } from './features/payroll/payroll.routes';
 
 const ALL_ROLES = ['admin', 'hr_payroll_manager', 'hr_payroll_user', 'hr_manager', 'employee'];
@@ -150,6 +151,16 @@ export const AppRoutes: React.FC = () => {
         element={
           <ProtectedLayout allowedRoles={PAYROLL_ROLES}>
             <PayrollDashboardPage />
+          </ProtectedLayout>
+        }
+      />
+
+      {/* Audit Trail Viewer */}
+      <Route
+        path="/audit-logs"
+        element={
+          <ProtectedLayout allowedRoles={['admin', 'hr_manager', 'hr_payroll_manager']}>
+            <AuditTrailPage />
           </ProtectedLayout>
         }
       />

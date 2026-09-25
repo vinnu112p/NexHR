@@ -85,7 +85,7 @@ export async function seed200Users() {
 
       const firstName = FIRST_NAMES[(i - 1) % FIRST_NAMES.length];
       const lastName = LAST_NAMES[Math.floor((i - 1) / FIRST_NAMES.length) % LAST_NAMES.length] || LAST_NAMES[i % LAST_NAMES.length];
-      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}.${padIndex}@peoplepay360.com`;
+      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}.${padIndex}@nexthr.com`;
       const posObj = POSITIONS[(i - 1) % POSITIONS.length];
       const bank = BANKS[(i - 1) % BANKS.length];
 

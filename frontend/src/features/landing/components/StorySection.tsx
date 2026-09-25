@@ -32,7 +32,7 @@ export const StorySection: React.FC = () => {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#0F172A] leading-tight">
             Why Traditional Payroll Fails — <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5A5FE8] to-[#06B6D4]">
-              And How PeoplePay Automates It.
+              And How NextHR Automates It.
             </span>
           </h2>
 
@@ -115,7 +115,7 @@ export const StorySection: React.FC = () => {
 
         </div>
 
-        {/* ================= ACT II: THE PEOPLEPAY AUTONOMOUS SOLUTION ================= */}
+        {/* ================= ACT II: THE NEXTHR AUTONOMOUS SOLUTION ================= */}
         <div className="w-full bg-gradient-to-br from-[#F8F9FD] to-[#F1F3FF] rounded-[32px] p-8 lg:p-12 border border-[#5A5FE8]/15 shadow-[0_15px_40px_rgba(90,95,232,0.08)]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
@@ -132,7 +132,7 @@ export const StorySection: React.FC = () => {
               </h3>
 
               <p className="text-sm text-slate-600 leading-relaxed">
-                PeoplePay eliminates fragmented handoffs by running on a centralized <strong>Supabase PostgreSQL</strong> backbone. Every employee update instantly cascades into the sequenced salary engine with zero manual re-entry.
+                NextHR eliminates fragmented handoffs by running on a centralized <strong>Supabase PostgreSQL</strong> backbone. Every employee update instantly cascades into the sequenced salary engine with zero manual re-entry.
               </p>
 
               <div className="grid grid-cols-2 gap-4 pt-2">
@@ -191,12 +191,12 @@ export const StorySection: React.FC = () => {
                 </div>
               </div>
 
-              {/* PeoplePay Way */}
+              {/* NextHR Way */}
               <div className="p-3.5 rounded-xl bg-indigo-50/60 border border-[#5A5FE8]/30 flex items-center justify-between shadow-xs">
                 <div>
                   <div className="text-xs font-extrabold text-[#5A5FE8] flex items-center gap-1.5">
                     <Zap className="w-3.5 h-3.5 text-[#5A5FE8]" />
-                    <span>PeoplePay Autonomous Pipeline</span>
+                    <span>NextHR Autonomous Pipeline</span>
                   </div>
                   <div className="text-[11px] text-slate-600 mt-0.5">
                     PostgreSQL Trigger ➔ Attendance Kiosk ➔ Sequenced Rule AST ➔ 1-Click Disburse

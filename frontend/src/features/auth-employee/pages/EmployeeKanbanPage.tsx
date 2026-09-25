@@ -5,13 +5,13 @@ import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
 import { Pagination } from '../../../components/ui/Pagination';
 import { apiRequest } from '../../../lib/api';
-import { LayoutGrid, List, Plus, Search, Mail, Building2, ChevronRight, ChevronLeft, ArrowRight } from 'lucide-react';
+import { LayoutGrid, List, Plus, Search, Mail, Building2, ChevronRight, ChevronLeft, ArrowRight, UserCheck } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { getNormalizedRole } from '../../../layouts/SubNav';
 import { getAiAvatar } from '../../../lib/avatar';
 
 export const EmployeeKanbanPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, impersonateUser } = useAuth();
   const normalizedRole = getNormalizedRole(user);
   const isEmployeeRole = normalizedRole === 'employee';
 
@@ -241,7 +241,28 @@ export const EmployeeKanbanPage: React.FC = () => {
 
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-primary font-semibold">
                   <span>View Profile</span>
-                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  <div className="flex items-center gap-2">
+                    {normalizedRole === 'admin' && emp.email !== user?.email && (
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const res = await impersonateUser(emp.id);
+                          if (res.success) {
+                            navigate('/attendance');
+                          } else {
+                            alert(res.message || 'Failed to start impersonation');
+                          }
+                        }}
+                        className="text-[11px] font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2 py-0.5 rounded-full transition-colors flex items-center gap-1 shadow-2xs"
+                        title="Impersonate this employee"
+                      >
+                        <UserCheck className="w-3 h-3" />
+                        Impersonate
+                      </button>
+                    )}
+                    <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
               </div>
             ))}
@@ -311,9 +332,30 @@ export const EmployeeKanbanPage: React.FC = () => {
                         <Badge status={emp.status === 'active' ? 'Approved' : 'Draft'} />
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <Button variant="ghost" size="sm" className="rounded-full text-xs">
-                          View
-                        </Button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {normalizedRole === 'admin' && emp.email !== user?.email && (
+                            <button
+                              type="button"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                const res = await impersonateUser(emp.id);
+                                if (res.success) {
+                                  navigate('/attendance');
+                                } else {
+                                  alert(res.message || 'Failed to start impersonation');
+                                }
+                              }}
+                              className="text-[11px] font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 shadow-2xs"
+                              title="Impersonate this employee"
+                            >
+                              <UserCheck className="w-3 h-3" />
+                              Impersonate
+                            </button>
+                          )}
+                          <Button variant="ghost" size="sm" className="rounded-full text-xs">
+                            View
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

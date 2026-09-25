@@ -68,7 +68,7 @@ export const Footer: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
-        <span>© 2026 PeoplePay Platform. All rights reserved.</span>
+        <span>© 2026 NextHR Platform. All rights reserved.</span>
         <div className="flex items-center gap-4">
           <span>Supabase PostgreSQL Cloud</span>
           <span>·</span>

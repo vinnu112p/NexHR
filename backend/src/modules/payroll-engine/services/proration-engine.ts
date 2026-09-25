@@ -4,8 +4,8 @@ export interface PeriodDates {
 }
 
 export interface ContractDetails {
-  id: number;
-  employee_id: number;
+  id: number | string;
+  employee_id: number | string;
   wage: number;
   start_date: Date;
   end_date?: Date | null;

@@ -70,12 +70,31 @@ router.get('/', authMiddleware, async (req: AuthenticatedRequest, res: Response)
   const result = await query(sql, params);
   let rows = result.rows || [];
 
+  const page = req.query.page ? parseInt(String(req.query.page), 10) : undefined;
+  const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : (req.query.pageSize ? parseInt(String(req.query.pageSize), 10) : undefined);
+
   if (has_exception === 'true') {
     rows = rows.filter((a: any) => a.has_exception);
   }
 
   if (status) {
     rows = rows.filter((a: any) => a.computed_status.toLowerCase() === String(status).toLowerCase());
+  }
+
+  if (page !== undefined && limit !== undefined && limit > 0) {
+    const total = rows.length;
+    const offset = Math.max(0, (page - 1) * limit);
+    const paginatedRows = rows.slice(offset, offset + limit);
+    return res.json({
+      success: true,
+      data: paginatedRows,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   }
 
   return res.json({ success: true, data: rows });

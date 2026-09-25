@@ -72,4 +72,35 @@ const otResult = RuleEvaluator.evaluateRule(formulaRule, otContext);
 assert.strictEqual(otResult, 300, 'Overtime pay formula should evaluate correctly');
 console.log('✓ Test 4 Passed: Formula expression calculation');
 
+// Test 5: Condition Evaluation Check
+const conditionalRule: SalaryRuleDefinition = {
+  id: 5,
+  code: 'BONUS',
+  name: 'Performance Bonus',
+  category: 'ALLOWANCE',
+  sequence: 50,
+  computation_method: 'Fixed',
+  amount: 1000,
+  condition_expression: 'WORKED_DAYS >= 20',
+};
+const meetsCondition = RuleEvaluator.evaluateCondition(conditionalRule.condition_expression!, context);
+assert.strictEqual(meetsCondition, true, 'Condition WORKED_DAYS >= 20 should evaluate to true');
+const failContext: EvaluationContext = { ...context, WORKED_DAYS: 15 };
+const failsCondition = RuleEvaluator.evaluateCondition(conditionalRule.condition_expression!, failContext);
+assert.strictEqual(failsCondition, false, 'Condition WORKED_DAYS >= 20 should evaluate to false when WORKED_DAYS = 15');
+const failRuleAmount = RuleEvaluator.evaluateRule(conditionalRule, failContext);
+assert.strictEqual(failRuleAmount, 0, 'Rule evaluation should return 0 if condition fails');
+console.log('✓ Test 5 Passed: Conditional rule expression check');
+
+// Test 6: Safe Evaluator Sandbox Security (Blocking unauthorized code)
+import { safeEvalExpression } from '../src/modules/payroll-engine/services/safe-evaluator.js';
+let securityBlocked = false;
+try {
+  safeEvalExpression('process.exit(1)', {});
+} catch {
+  securityBlocked = true;
+}
+assert.strictEqual(securityBlocked, true, 'Malicious/unauthorized expressions should be blocked by safe evaluator');
+console.log('✓ Test 6 Passed: Safe evaluator security sandbox test');
+
 console.log('All RuleEvaluator tests passed successfully!\n');

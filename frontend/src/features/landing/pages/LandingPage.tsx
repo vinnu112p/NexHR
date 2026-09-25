@@ -216,7 +216,7 @@ export const LandingPage: React.FC = () => {
         {/* 2. Enterprise Infrastructure / Tech Stack Trust Strip */}
         <EcosystemStrip />
 
-        {/* 3. Storytelling: Problem (Spreadsheet Disaster) & Solution (PeoplePay Engine) */}
+        {/* 3. Storytelling: Problem (Spreadsheet Disaster) & Solution (NextHR Engine) */}
         <StorySection />
 
         {/* 4. ScrollTrigger 18s Code-Simulated Demo Video Engine */}

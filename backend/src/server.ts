@@ -2,6 +2,7 @@ import http from 'http';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 import { registerRoutes } from './routes.loader.js';
 import { initWebSocket } from './core/websocket.js';
 
@@ -14,11 +15,31 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Rate limiting — general API (200 req/min per IP)
+const generalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests. Please slow down.' } },
+});
+app.use('/api', generalLimiter);
+
+// Rate limiting — auth endpoints (10 attempts per 15 min per IP)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many login attempts. Try again in 15 minutes.' } },
+});
+app.use('/api/v1/auth/login', authLimiter);
+
 // Health Check
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    service: 'PeoplePay360 Backend API',
+    service: 'NextHR Backend API',
     timestamp: new Date().toISOString(),
   });
 });
@@ -43,6 +64,6 @@ const server = http.createServer(app);
 initWebSocket(server);
 
 server.listen(PORT, () => {
-  console.log(`🚀 PeoplePay360 Backend API running on http://localhost:${PORT}`);
-  console.log(`⚡ PeoplePay360 WebSocket running on ws://localhost:${PORT}/ws`);
+  console.log(`🚀 NextHR Backend API running on http://localhost:${PORT}`);
+  console.log(`⚡ NextHR WebSocket running on ws://localhost:${PORT}/ws`);
 });

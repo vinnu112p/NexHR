@@ -2,6 +2,9 @@ import { Router, Response } from 'express';
 import { query } from '../../core/db.js';
 import { authMiddleware, requireRole, AuthenticatedRequest } from '../../core/auth.js';
 import { broadcastEvent } from '../../core/websocket.js';
+import { enqueueEmail } from '../../core/email.js';
+import { leaveStatusTemplate } from '../../core/email-templates.js';
+import { logAudit } from '../../core/audit.js';
 
 const router = Router();
 
@@ -214,7 +217,37 @@ router.get('/requests', authMiddleware, async (req: AuthenticatedRequest, res: R
   if (conditions.length > 0) {
     sql += ' WHERE ' + conditions.join(' AND ');
   }
-  sql += ' ORDER BY r.created_at DESC';
+  const page = req.query.page ? parseInt(String(req.query.page), 10) : undefined;
+  const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : (req.query.pageSize ? parseInt(String(req.query.pageSize), 10) : undefined);
+
+  if (page !== undefined && limit !== undefined && limit > 0) {
+    const countSql = `SELECT COUNT(*)::int as total FROM time_off_requests r ${conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : ''}`;
+    const countRes = await query(countSql, params);
+    const total = countRes.rows?.[0]?.total || 0;
+
+    const offset = Math.max(0, (page - 1) * limit);
+    sql += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(limit, offset);
+
+    const result = await query(sql, params);
+    const formatted = (result.rows || []).map((row: any) => ({
+      ...row,
+      employee: { first_name: row.first_name, last_name: row.last_name },
+      time_off_type: { name: row.type_name, display_color: row.display_color, unit: row.time_off_unit },
+      approved_by_user: row.approver_first_name ? { first_name: row.approver_first_name, last_name: row.approver_last_name } : null,
+    }));
+
+    return res.json({
+      success: true,
+      data: formatted,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  }
 
   const result = await query(sql, params);
 
@@ -423,6 +456,36 @@ router.post('/requests/:id/approve', authMiddleware, requireRole(['admin', 'hr_m
     [approverId, String(id)]
   );
 
+  // Email notification to employee
+  const empRes = await query('SELECT first_name, last_name, email FROM employees WHERE id = $1', [request.employee_id]);
+  const emp = empRes.rows?.[0];
+  if (emp && emp.email && emp.email.includes('@')) {
+    const html = leaveStatusTemplate({
+      employeeName: `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || 'Employee',
+      leaveType: type?.name || 'Leave',
+      startDate: request.start_date,
+      endDate: request.end_date,
+      requestedAmount: Number(request.requested_amount),
+      status: 'Approved',
+      reviewerName: req.user?.email || 'HR Management',
+    });
+    enqueueEmail({
+      to: emp.email,
+      subject: `Time-Off Request Approved (${request.start_date} to ${request.end_date}) - NexHR`,
+      html,
+    });
+  }
+
+  // Audit trail log
+  await logAudit({
+    tableName: 'time_off_requests',
+    recordId: String(id),
+    action: 'APPROVE',
+    changedBy: req.user?.userId || req.user?.id || 'admin',
+    oldValues: { status: request.status, approved_by: request.approved_by },
+    newValues: { status: 'Approved', approved_by: approverId },
+  });
+
   broadcastEvent({
     type: 'TIMEOFF_UPDATE',
     action: 'REQUEST_APPROVED',
@@ -467,6 +530,36 @@ router.post('/requests/:id/refuse', authMiddleware, requireRole(['admin', 'hr_ma
      WHERE id = $2 RETURNING *`,
     [approverId, String(id)]
   );
+
+  // Email notification to employee
+  const empRes = await query('SELECT first_name, last_name, email FROM employees WHERE id = $1', [request.employee_id]);
+  const emp = empRes.rows?.[0];
+  if (emp && emp.email && emp.email.includes('@')) {
+    const html = leaveStatusTemplate({
+      employeeName: `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || 'Employee',
+      leaveType: type?.name || 'Leave',
+      startDate: request.start_date,
+      endDate: request.end_date,
+      requestedAmount: Number(request.requested_amount),
+      status: 'Refused',
+      reviewerName: req.user?.email || 'HR Management',
+    });
+    enqueueEmail({
+      to: emp.email,
+      subject: `Time-Off Request Refused (${request.start_date} to ${request.end_date}) - NexHR`,
+      html,
+    });
+  }
+
+  // Audit trail log
+  await logAudit({
+    tableName: 'time_off_requests',
+    recordId: String(id),
+    action: 'REFUSE',
+    changedBy: req.user?.userId || req.user?.id || 'admin',
+    oldValues: { status: request.status, approved_by: request.approved_by },
+    newValues: { status: 'Refused', approved_by: approverId },
+  });
 
   broadcastEvent({
     type: 'TIMEOFF_UPDATE',

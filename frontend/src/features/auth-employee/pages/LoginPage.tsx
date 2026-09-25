@@ -32,28 +32,28 @@ interface SeedAccount {
 const SEED_ACCOUNTS: SeedAccount[] = [
   {
     name: 'System Admin',
-    email: 'admin@peoplepay360.com',
+    email: 'admin@nexthr.com',
     role: 'Platform Administrator',
     roleId: 'admin',
     badge: 'Executive',
   },
   {
     name: 'HR Manager',
-    email: 'hr.manager@peoplepay360.com',
+    email: 'hr.manager@nexthr.com',
     role: 'HR Operations Manager',
     roleId: 'hr_manager',
     badge: 'Operations',
   },
   {
     name: 'Payroll Manager',
-    email: 'payroll@peoplepay360.com',
+    email: 'payroll@nexthr.com',
     role: 'HR Payroll Manager',
     roleId: 'hr_payroll_manager',
     badge: 'Finance',
   },
   {
     name: 'Amara Chen',
-    email: 'amara.chen@peoplepay360.com',
+    email: 'amara.chen@nexthr.com',
     role: 'Sales Associate',
     roleId: 'employee',
     badge: 'Staff',
@@ -61,7 +61,7 @@ const SEED_ACCOUNTS: SeedAccount[] = [
 ];
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('admin@peoplepay360.com');
+  const [email, setEmail] = useState('admin@nexthr.com');
   const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -161,7 +161,7 @@ export const LoginPage: React.FC = () => {
           <div className="relative rounded-[32px] overflow-hidden border border-white/80 shadow-[0_20px_50px_rgba(20,28,60,0.06)] bg-white/60 backdrop-blur-xl group">
             <img 
               src={loginVisual} 
-              alt="PeoplePay360 3D Isometric Fintech Architecture"
+              alt="NextHR 3D Isometric Fintech Architecture"
               className="w-full h-[360px] sm:h-[440px] lg:h-[490px] object-contain object-center p-2 transform group-hover:scale-[1.01] transition-transform duration-700 ease-out"
             />
 
@@ -212,7 +212,7 @@ export const LoginPage: React.FC = () => {
                 Enterprise Sign In
               </h1>
               <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-                Enter your registered credentials to access your PeoplePay360 workspace.
+                Enter your registered credentials to access your NextHR workspace.
               </p>
             </div>
 
@@ -317,7 +317,7 @@ export const LoginPage: React.FC = () => {
       <div className="max-w-7xl w-full mx-auto mt-8 pt-4 border-t border-slate-200/70 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 relative z-10">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>PeoplePay360 Identity Provider Active</span>
+          <span>NextHR Identity Provider Active</span>
           <span className="text-slate-300">•</span>
           <span>Standard Password: <code className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-mono text-[11px]">password123</code></span>
         </div>

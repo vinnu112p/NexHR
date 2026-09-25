@@ -1,4 +1,7 @@
 import { query } from '../../../core/db.js';
+import { sendEmailDirect } from '../../../core/email.js';
+import { payslipReadyTemplate } from '../../../core/email-templates.js';
+import { PdfGeneratorService } from './pdf-generator.service.js';
 
 export interface PayslipDetail {
   id: string;
@@ -81,31 +84,127 @@ export class PayslipService {
   }
 
   static async getPayslipsByPayrunId(payrunId: string): Promise<PayslipDetail[]> {
-    const res = await query('SELECT id FROM payslips WHERE payrun_id = $1 ORDER BY id ASC', [String(payrunId)]);
-    if (res.rows && res.rows.length > 0) {
-      const details: PayslipDetail[] = [];
-      for (const r of res.rows) {
-        const ps = await this.getPayslipById(r.id);
-        if (ps) details.push(ps);
-      }
-      return details;
+    const psRes = await query(
+      `SELECT ps.*, pr.name as payrun_name, pr.period_start as pr_period_start, pr.period_end as pr_period_end,
+              e.first_name, e.last_name, e.job_position, d.name as department_name,
+              COALESCE(c.wage, ps.basic_wage) as contract_wage
+       FROM payslips ps
+       LEFT JOIN payruns pr ON ps.payrun_id = pr.id
+       LEFT JOIN employees e ON ps.employee_id = e.id
+       LEFT JOIN departments d ON e.department_id = d.id
+       LEFT JOIN contracts c ON ps.contract_id = c.id
+       WHERE ps.payrun_id = $1
+       ORDER BY ps.id ASC`,
+      [String(payrunId)]
+    );
+
+    if (!psRes.rows || psRes.rows.length === 0) {
+      return [];
     }
 
-    return [];
+    const payslipIds = psRes.rows.map((r: any) => r.id);
+    const linesRes = await query(
+      `SELECT pl.payslip_id, pl.amount, pl.id as line_id, pl.salary_rule_id as rule_id, pl.code, pl.name, pl.category, pl.sequence
+       FROM payslip_lines pl
+       WHERE pl.payslip_id = ANY($1)
+       ORDER BY pl.sequence ASC`,
+      [payslipIds]
+    );
+
+    const linesByPayslip = new Map<string, any[]>();
+    for (const line of (linesRes.rows || [])) {
+      if (!linesByPayslip.has(line.payslip_id)) {
+        linesByPayslip.set(line.payslip_id, []);
+      }
+      linesByPayslip.get(line.payslip_id)!.push({
+        rule_id: line.rule_id || line.line_id,
+        code: line.code || 'COMP',
+        name: line.name || 'Component',
+        category: line.category || 'ALLOWANCE',
+        sequence: Number(line.sequence || 10),
+        amount: Number(line.amount || 0),
+      });
+    }
+
+    return psRes.rows.map((row: any) => ({
+      id: row.id,
+      payrun_id: row.payrun_id,
+      payrun_name: row.payrun_name || 'Payrun Batch',
+      period_start: row.period_start || row.pr_period_start,
+      period_end: row.period_end || row.pr_period_end,
+      employee_id: row.employee_id,
+      employee_name: `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.employee_id,
+      department_name: row.department_name || 'General',
+      job_position: row.job_position || 'Staff',
+      contract_wage: Number(row.contract_wage || 0),
+      basic_wage: Number(row.basic_wage || 0),
+      gross_wage: Number(row.gross_wage || 0),
+      net_wage: Number(row.net_wage || 0),
+      status: row.status,
+      lines: linesByPayslip.get(row.id) || [],
+    }));
   }
 
   static async getPayslipsByEmployeeId(employeeId: string): Promise<PayslipDetail[]> {
-    const res = await query('SELECT id FROM payslips WHERE employee_id = $1 ORDER BY period_end DESC', [String(employeeId)]);
-    if (res.rows && res.rows.length > 0) {
-      const details: PayslipDetail[] = [];
-      for (const r of res.rows) {
-        const ps = await this.getPayslipById(r.id);
-        if (ps) details.push(ps);
-      }
-      return details;
+    const psRes = await query(
+      `SELECT ps.*, pr.name as payrun_name, pr.period_start as pr_period_start, pr.period_end as pr_period_end,
+              e.first_name, e.last_name, e.job_position, d.name as department_name,
+              COALESCE(c.wage, ps.basic_wage) as contract_wage
+       FROM payslips ps
+       LEFT JOIN payruns pr ON ps.payrun_id = pr.id
+       LEFT JOIN employees e ON ps.employee_id = e.id
+       LEFT JOIN departments d ON e.department_id = d.id
+       LEFT JOIN contracts c ON ps.contract_id = c.id
+       WHERE ps.employee_id = $1
+       ORDER BY ps.period_end DESC`,
+      [String(employeeId)]
+    );
+
+    if (!psRes.rows || psRes.rows.length === 0) {
+      return [];
     }
 
-    return [];
+    const payslipIds = psRes.rows.map((r: any) => r.id);
+    const linesRes = await query(
+      `SELECT pl.payslip_id, pl.amount, pl.id as line_id, pl.salary_rule_id as rule_id, pl.code, pl.name, pl.category, pl.sequence
+       FROM payslip_lines pl
+       WHERE pl.payslip_id = ANY($1)
+       ORDER BY pl.sequence ASC`,
+      [payslipIds]
+    );
+
+    const linesByPayslip = new Map<string, any[]>();
+    for (const line of (linesRes.rows || [])) {
+      if (!linesByPayslip.has(line.payslip_id)) {
+        linesByPayslip.set(line.payslip_id, []);
+      }
+      linesByPayslip.get(line.payslip_id)!.push({
+        rule_id: line.rule_id || line.line_id,
+        code: line.code || 'COMP',
+        name: line.name || 'Component',
+        category: line.category || 'ALLOWANCE',
+        sequence: Number(line.sequence || 10),
+        amount: Number(line.amount || 0),
+      });
+    }
+
+    return psRes.rows.map((row: any) => ({
+      id: row.id,
+      payrun_id: row.payrun_id,
+      payrun_name: row.payrun_name || 'Payrun Batch',
+      period_start: row.period_start || row.pr_period_start,
+      period_end: row.period_end || row.pr_period_end,
+      employee_id: row.employee_id,
+      employee_name: `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.employee_id,
+      department_name: row.department_name || 'General',
+      job_position: row.job_position || 'Staff',
+      contract_wage: Number(row.contract_wage || 0),
+      basic_wage: Number(row.basic_wage || 0),
+      gross_wage: Number(row.gross_wage || 0),
+      net_wage: Number(row.net_wage || 0),
+      status: row.status,
+      lines: linesByPayslip.get(row.id) || [],
+    }));
   }
 
   static async sendBulkPayslipEmails(payrunId: string): Promise<{ total: number; sent: number; failed: number; logs: any[] }> {
@@ -116,31 +215,60 @@ export class PayslipService {
 
     for (const ps of payslips) {
       const empRes = await query('SELECT email FROM employees WHERE id = $1', [ps.employee_id]);
-      let email = empRes.rows && empRes.rows[0]?.email;
+      const email = empRes.rows && empRes.rows[0]?.email;
 
-      const emailLogId = `elog_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
       if (email && email.includes('@') && !email.includes('no-email')) {
-        sentCount++;
-        const logRes = await query(
-          `INSERT INTO email_logs (id, recipient_email, subject, payslip_id, status)
-           VALUES ($1, $2, $3, $4, 'Sent')
-           RETURNING *`,
-          [emailLogId, email, `Payslip for ${ps.payrun_name}`, ps.id]
-        );
-        if (logRes.rows && logRes.rows[0]) {
-          logs.push(logRes.rows[0]);
+        try {
+          // Generate real PDF voucher
+          const pdfBuffer = await PdfGeneratorService.generatePayslipPdf(ps);
+          
+          const html = payslipReadyTemplate({
+            employeeName: ps.employee_name,
+            payrunName: ps.payrun_name,
+            netSalary: ps.net_wage,
+            basicWage: ps.basic_wage,
+            grossWage: ps.gross_wage,
+            totalDeductions: ps.gross_wage - ps.net_wage,
+            periodStart: ps.period_start,
+            periodEnd: ps.period_end,
+            hasPdfAttachment: true,
+          });
+
+          const emailRes = await sendEmailDirect({
+            to: email,
+            subject: `Official Payslip: ${ps.payrun_name} - NexHR`,
+            html,
+            payslipId: ps.id,
+            attachments: [
+              {
+                filename: `payslip-${ps.id}.pdf`,
+                content: pdfBuffer,
+                contentType: 'application/pdf',
+              },
+            ],
+          });
+
+          if (emailRes.success) {
+            sentCount++;
+            await query("UPDATE payslips SET email_status = 'SENT', emailed_at = CURRENT_TIMESTAMP WHERE id = $1", [ps.id]);
+            logs.push({ id: emailRes.id, recipient_email: email, subject: `Payslip for ${ps.payrun_name}`, status: 'Sent' });
+          } else {
+            failedCount++;
+            logs.push({ id: emailRes.id, recipient_email: email, subject: `Payslip for ${ps.payrun_name}`, status: 'Failed', error_message: emailRes.error });
+          }
+        } catch (err: any) {
+          failedCount++;
+          logs.push({ recipient_email: email, status: 'Failed', error_message: err.message });
         }
       } else {
         failedCount++;
-        const logRes = await query(
+        const emailLogId = `elog_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        await query(
           `INSERT INTO email_logs (id, recipient_email, subject, payslip_id, status, error_message)
-           VALUES ($1, $2, $3, $4, 'Failed', 'Invalid or missing recipient email address')
-           RETURNING *`,
+           VALUES ($1, $2, $3, $4, 'Failed', 'Invalid or missing recipient email address')`,
           [emailLogId, email || 'invalid-email', `Payslip for ${ps.payrun_name}`, ps.id]
         );
-        if (logRes.rows && logRes.rows[0]) {
-          logs.push(logRes.rows[0]);
-        }
+        logs.push({ id: emailLogId, recipient_email: email || 'invalid-email', status: 'Failed' });
       }
     }
 

@@ -32,9 +32,6 @@ router.get('/summary', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_p
       sfSql += ` AND d.name = $${sfParams.length + 1}`;
       sfParams.push(department);
     }
-    
-    const salaryFundRes = await query(sfSql, sfParams);
-    const salaryFund = salaryFundRes.rows?.[0] || { total_net: 0, total_gross: 0, payslip_count: 0 };
 
     // --- KPI 2: Active Headcount ---
     let hcSql = `
@@ -48,11 +45,6 @@ router.get('/summary', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_p
       hcSql += ` AND d.name = $${hcParams.length + 1}`;
       hcParams.push(department);
     }
-    const headcountRes = await query(hcSql, hcParams);
-    const headcount = headcountRes.rows?.[0]?.active_employees || 0;
-
-    // --- KPI 3: Avg Salary per Employee ---
-    const avgSalary = headcount > 0 ? Math.round((salaryFund.total_net / headcount) * 100) / 100 : 0;
 
     // --- KPI 4: Approved Time Off Days ---
     let toSql = `
@@ -71,8 +63,6 @@ router.get('/summary', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_p
       toSql += ` AND d.name = $${toParams.length + 1}`;
       toParams.push(department);
     }
-    const timeOffRes = await query(toSql, toParams);
-    const approvedTimeOff = timeOffRes.rows?.[0]?.approved_days || 0;
 
     // --- KPI 5: Attendance Health Rate ---
     let attSql = `
@@ -94,11 +84,6 @@ router.get('/summary', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_p
       attSql += ` AND d.name = $${attParams.length + 1}`;
       attParams.push(department);
     }
-    const attendanceRes = await query(attSql, attParams);
-    const attData = attendanceRes.rows?.[0] || { total_records: 0, complete_records: 0, missing_checkouts: 0 };
-    const attendanceRate = attData.total_records > 0 
-      ? Math.round((attData.complete_records / attData.total_records) * 1000) / 10 
-      : 100;
 
     // --- KPI 6: Pending Time Off Requests ---
     let pendSql = `
@@ -117,7 +102,24 @@ router.get('/summary', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_p
       pendSql += ` AND d.name = $${pendParams.length + 1}`;
       pendParams.push(department);
     }
-    const pendingRes = await query(pendSql, pendParams);
+
+    // Execute all KPI queries in parallel with Promise.all
+    const [salaryFundRes, headcountRes, timeOffRes, attendanceRes, pendingRes] = await Promise.all([
+      query(sfSql, sfParams),
+      query(hcSql, hcParams),
+      query(toSql, toParams),
+      query(attSql, attParams),
+      query(pendSql, pendParams),
+    ]);
+
+    const salaryFund = salaryFundRes.rows?.[0] || { total_net: 0, total_gross: 0, payslip_count: 0 };
+    const headcount = headcountRes.rows?.[0]?.active_employees || 0;
+    const avgSalary = headcount > 0 ? Math.round((salaryFund.total_net / headcount) * 100) / 100 : 0;
+    const approvedTimeOff = timeOffRes.rows?.[0]?.approved_days || 0;
+    const attData = attendanceRes.rows?.[0] || { total_records: 0, complete_records: 0, missing_checkouts: 0 };
+    const attendanceRate = attData.total_records > 0 
+      ? Math.round((attData.complete_records / attData.total_records) * 1000) / 10 
+      : 100;
     const pendingTimeOff = pendingRes.rows?.[0]?.pending_requests || 0;
 
     return res.json({
@@ -251,16 +253,43 @@ router.get('/alerts', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_pa
     const alerts: Array<{ type: string; severity: string; message: string; count?: number }> = [];
     const { department } = req.query;
     
-    let deptFilter = department ? `AND d.name = '${department}'` : '';
-    let deptJoin = department ? `LEFT JOIN departments d ON e.department_id = d.id` : '';
+    const deptJoin = department ? `LEFT JOIN departments d ON e.department_id = d.id` : '';
+    const deptCondition = department ? `AND d.name = $1` : '';
+    const deptParams: any[] = department ? [String(department)] : [];
 
-    // Alert 1: Employees missing bank details
-    const bankRes = await query(`
-      SELECT COUNT(*)::int AS count FROM employees e
-      ${deptJoin}
-      WHERE e.status = 'active' AND (e.bank_account_number IS NULL OR e.bank_account_number = '')
-      ${deptFilter}
-    `);
+    const [bankRes, missCheckoutRes, pendingRes, noContractRes] = await Promise.all([
+      query(`
+        SELECT COUNT(*)::int AS count FROM employees e
+        ${deptJoin}
+        WHERE e.status = 'active' AND (e.bank_account_number IS NULL OR e.bank_account_number = '')
+        ${deptCondition}
+      `, deptParams),
+      query(`
+        SELECT COUNT(*)::int AS count FROM attendances a
+        JOIN employees e ON a.employee_id = e.id
+        ${deptJoin}
+        WHERE a.check_out IS NULL AND a.check_in < NOW() - INTERVAL '16 hours'
+        ${deptCondition}
+      `, deptParams),
+      query(`
+        SELECT COUNT(*)::int AS count FROM time_off_requests tor
+        JOIN employees e ON tor.employee_id = e.id
+        ${deptJoin}
+        WHERE tor.status = 'Pending'
+        ${deptCondition}
+      `, deptParams),
+      query(`
+        SELECT COUNT(*)::int AS count FROM employees e
+        ${deptJoin}
+        WHERE e.status = 'active'
+        ${deptCondition}
+          AND NOT EXISTS (
+            SELECT 1 FROM contracts c 
+            WHERE c.employee_id = e.id AND c.status = 'Running'
+          )
+      `, deptParams),
+    ]);
+
     const missingBank = bankRes.rows?.[0]?.count || 0;
     if (missingBank > 0) {
       alerts.push({
@@ -271,14 +300,6 @@ router.get('/alerts', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_pa
       });
     }
 
-    // Alert 2: Missing attendance check-outs
-    const missCheckoutRes = await query(`
-      SELECT COUNT(*)::int AS count FROM attendances a
-      JOIN employees e ON a.employee_id = e.id
-      ${deptJoin}
-      WHERE a.check_out IS NULL AND a.check_in < NOW() - INTERVAL '16 hours'
-      ${deptFilter}
-    `);
     const missingCheckouts = missCheckoutRes.rows?.[0]?.count || 0;
     if (missingCheckouts > 0) {
       alerts.push({
@@ -289,14 +310,6 @@ router.get('/alerts', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_pa
       });
     }
 
-    // Alert 3: Pending time off requests
-    const pendingRes = await query(`
-      SELECT COUNT(*)::int AS count FROM time_off_requests tor
-      JOIN employees e ON tor.employee_id = e.id
-      ${deptJoin}
-      WHERE tor.status = 'Pending'
-      ${deptFilter}
-    `);
     const pendingCount = pendingRes.rows?.[0]?.count || 0;
     if (pendingCount > 0) {
       alerts.push({
@@ -307,17 +320,6 @@ router.get('/alerts', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_pa
       });
     }
 
-    // Alert 4: Employees with no active contract
-    const noContractRes = await query(`
-      SELECT COUNT(*)::int AS count FROM employees e
-      ${deptJoin}
-      WHERE e.status = 'active'
-      ${deptFilter}
-        AND NOT EXISTS (
-          SELECT 1 FROM contracts c 
-          WHERE c.employee_id = e.id AND c.status = 'Running'
-        )
-    `);
     const noContract = noContractRes.rows?.[0]?.count || 0;
     if (noContract > 0) {
       alerts.push({

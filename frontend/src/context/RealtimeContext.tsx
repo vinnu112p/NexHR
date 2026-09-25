@@ -34,7 +34,7 @@ interface RealtimeContextType {
   subscribe: (eventType: string, callback: (event: RealtimeEvent) => void) => () => void;
 }
 
-const STORAGE_KEY = 'peoplepay360_notifications_v2';
+const STORAGE_KEY = 'nexthr_notifications_v2';
 
 const INITIAL_NOTIFICATIONS: AppNotification[] = [
   {
@@ -153,7 +153,7 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               }
 
               // Global custom DOM event for other listeners
-              window.dispatchEvent(new CustomEvent('peoplepay360:realtime', { detail: data }));
+              window.dispatchEvent(new CustomEvent('nexthr:realtime', { detail: data }));
             }
           } catch (err) {
             console.warn('[Realtime] Parse error:', err);

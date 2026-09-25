@@ -5,6 +5,7 @@ import { PayslipService } from './services/payslip.service.js';
 import { PdfGeneratorService } from './services/pdf-generator.service.js';
 import { AuthenticatedRequest } from '../../core/auth.js';
 import { broadcastEvent } from '../../core/websocket.js';
+import { logAudit } from '../../core/audit.js';
 
 export class PayrollController {
   // Salary Structures & Rules
@@ -135,6 +136,14 @@ export class PayrollController {
         period_end,
         selected_employee_ids
       );
+      await logAudit({
+        tableName: 'payruns',
+        recordId: (payrun as any).id,
+        action: 'CREATE',
+        changedBy: (req as any).user?.userId || (req as any).user?.id || 'admin',
+        newValues: { name, structure_id, period_start, period_end },
+      });
+
       broadcastEvent({
         type: 'PAYROLL_UPDATE',
         action: 'PAYRUN_CREATED',
@@ -155,6 +164,15 @@ export class PayrollController {
     try {
       const id = String(req.params.id);
       const payrun = await PayrunService.updatePayrunStatus(id, 'Validated');
+
+      await logAudit({
+        tableName: 'payruns',
+        recordId: id,
+        action: 'STATUS_CHANGE',
+        changedBy: (req as any).user?.userId || (req as any).user?.id || 'admin',
+        newValues: { status: 'Validated', name: payrun.name },
+      });
+
       broadcastEvent({
         type: 'PAYROLL_UPDATE',
         action: 'PAYRUN_VALIDATED',
@@ -175,13 +193,25 @@ export class PayrollController {
     try {
       const id = String(req.params.id);
       const payrun = await PayrunService.updatePayrunStatus(id, 'Paid');
+
+      await logAudit({
+        tableName: 'payruns',
+        recordId: id,
+        action: 'PAYROLL_EXECUTE',
+        changedBy: (req as any).user?.userId || (req as any).user?.id || 'admin',
+        newValues: { status: 'Paid', total_gross: payrun.total_gross, total_net: payrun.total_net },
+      });
+
+      // Auto-trigger payslip emails with attached PDF vouchers
+      PayslipService.sendBulkPayslipEmails(id).catch(e => console.error('[Payslip Auto Email]', e));
+
       broadcastEvent({
         type: 'PAYROLL_UPDATE',
         action: 'PAYRUN_PAID',
         payload: payrun,
         notification: {
           title: 'Payroll Disbursed',
-          message: `Batch "${payrun.name}" marked as Paid. Bank disbursals released.`,
+          message: `Batch "${payrun.name}" marked as Paid. Bank disbursals released and payslip emails dispatched.`,
           type: 'success',
         },
       });

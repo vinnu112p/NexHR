@@ -1,7 +1,13 @@
 import { Router, Response } from 'express';
-import { query, memoryDb } from '../../core/db.js';
+import bcrypt from 'bcrypt';
+import { query } from '../../core/db.js';
 import { generateToken, authMiddleware, requireRole, AuthenticatedRequest } from '../../core/auth.js';
 import { broadcastEvent } from '../../core/websocket.js';
+import { enqueueEmail } from '../../core/email.js';
+import { welcomeEmailTemplate } from '../../core/email-templates.js';
+import { logAudit, getAuditLogs } from '../../core/audit.js';
+
+const BCRYPT_SALT_ROUNDS = 12;
 
 const router = Router();
 
@@ -19,35 +25,47 @@ router.post('/auth/login', async (req, res) => {
   }
 
   let user: any = null;
+  const emailLower = email.toLowerCase().trim();
+  const altEmail = emailLower.includes('@nexthr.com')
+    ? emailLower.replace('@nexthr.com', '@peoplepay360.com')
+    : emailLower.replace('@peoplepay360.com', '@nexthr.com');
+
   const userRes = await query(
-    `SELECT u.*, r.name as role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE LOWER(u.email) = $1`,
-    [email.toLowerCase()]
+    `SELECT u.*, r.name as role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE LOWER(u.email) = $1 OR LOWER(u.email) = $2`,
+    [emailLower, altEmail]
   );
 
   if (userRes.rows && userRes.rows.length > 0) {
     user = userRes.rows[0];
-  } else {
-    // Memory DB fallback
-    const memUser = memoryDb.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (memUser) {
-      const roleObj = memoryDb.roles.find((r) => r.id === memUser.role_id);
-      user = {
-        id: memUser.id,
-        email: memUser.email,
-        password: memUser.password,
-        password_hash: memUser.password,
-        role_id: memUser.role_id,
-        role_name: roleObj?.name || memUser.role_id,
-        employee_id: memUser.employee_id,
-      };
-    }
   }
 
-  if (!user || (user.password !== password && user.password_hash !== password)) {
+  if (!user) {
     return res.status(401).json({
       success: false,
       error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' },
     });
+  }
+
+  // Compare password — support both bcrypt hashed and legacy plaintext passwords
+  const storedHash = user.password_hash || user.password;
+  let passwordValid = false;
+  if (storedHash && storedHash.startsWith('$2')) {
+    passwordValid = await bcrypt.compare(password, storedHash);
+  } else {
+    passwordValid = (storedHash === password);
+  }
+
+  if (!passwordValid) {
+    return res.status(401).json({
+      success: false,
+      error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' },
+    });
+  }
+
+  // Auto-migrate plaintext passwords to bcrypt on successful login
+  if (storedHash && !storedHash.startsWith('$2')) {
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+    await query('UPDATE users SET password_hash = $1, password = $1 WHERE id = $2', [hashedPassword, user.id]);
   }
 
   let employee: any = null;
@@ -55,15 +73,11 @@ router.post('/auth/login', async (req, res) => {
     const empRes = await query(`SELECT * FROM employees WHERE id = $1 OR LOWER(email) = $2`, [user.employee_id, user.email.toLowerCase()]);
     if (empRes.rows && empRes.rows.length > 0) {
       employee = empRes.rows[0];
-    } else {
-      employee = memoryDb.employees.find((e) => e.id === user.employee_id || e.email?.toLowerCase() === user.email?.toLowerCase()) || null;
     }
   } else {
     const empRes = await query(`SELECT * FROM employees WHERE LOWER(email) = $1`, [user.email.toLowerCase()]);
     if (empRes.rows && empRes.rows.length > 0) {
       employee = empRes.rows[0];
-    } else {
-      employee = memoryDb.employees.find((e) => e.email?.toLowerCase() === user.email?.toLowerCase()) || null;
     }
   }
 
@@ -97,17 +111,6 @@ router.get('/auth/me', authMiddleware, async (req: AuthenticatedRequest, res: Re
   );
   if (userRes.rows && userRes.rows.length > 0) {
     user = userRes.rows[0];
-  } else {
-    const memUser = memoryDb.users.find((u) => u.id === targetId || u.email?.toLowerCase() === req.user?.email?.toLowerCase());
-    if (memUser) {
-      const roleObj = memoryDb.roles.find((r) => r.id === memUser.role_id);
-      user = {
-        id: memUser.id,
-        email: memUser.email,
-        role_id: memUser.role_id,
-        role_name: roleObj?.name || memUser.role_id,
-      };
-    }
   }
 
   if (!user) {
@@ -118,8 +121,6 @@ router.get('/auth/me', authMiddleware, async (req: AuthenticatedRequest, res: Re
   const empRes = await query(`SELECT * FROM employees WHERE id = $1 OR LOWER(email) = $2`, [user.employee_id || null, user.email.toLowerCase()]);
   if (empRes.rows && empRes.rows.length > 0) {
     employee = empRes.rows[0];
-  } else {
-    employee = memoryDb.employees.find((e) => e.email?.toLowerCase() === user.email?.toLowerCase()) || null;
   }
 
   return res.json({
@@ -129,6 +130,184 @@ router.get('/auth/me', authMiddleware, async (req: AuthenticatedRequest, res: Re
       email: user.email,
       role: { id: user.role_id, name: user.role_name },
       employee: employee || null,
+      isImpersonating: Boolean(req.user?.isImpersonating),
+      impersonatedBy: req.user?.impersonatedBy || null,
+    },
+  });
+});
+
+// User Impersonation (ServiceNow-style Admin Tool)
+router.post('/auth/impersonate', authMiddleware, requireRole(['admin']), async (req: AuthenticatedRequest, res: Response) => {
+  const { target_employee_id, target_user_id } = req.body;
+  const adminId = req.user?.userId || req.user?.id;
+
+  if (!target_employee_id && !target_user_id) {
+    return res.status(400).json({
+      success: false,
+      error: { code: 'MISSING_FIELDS', message: 'target_employee_id or target_user_id is required.' },
+    });
+  }
+
+  let user: any = null;
+  let employee: any = null;
+
+  if (target_user_id) {
+    const uRes = await query(
+      `SELECT u.*, r.name as role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = $1`,
+      [String(target_user_id)]
+    );
+    user = uRes.rows?.[0];
+    if (user?.employee_id) {
+      const eRes = await query('SELECT * FROM employees WHERE id = $1', [user.employee_id]);
+      employee = eRes.rows?.[0];
+    }
+  } else if (target_employee_id) {
+    const eRes = await query(`SELECT * FROM employees WHERE id = $1`, [String(target_employee_id)]);
+    employee = eRes.rows?.[0];
+    if (employee) {
+      const uRes = await query(
+        `SELECT u.*, r.name as role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.employee_id = $1 OR LOWER(u.email) = $2`,
+        [employee.id, employee.email.toLowerCase()]
+      );
+      user = uRes.rows?.[0];
+    }
+  }
+
+  if (!user && !employee) {
+    return res.status(404).json({
+      success: false,
+      error: { code: 'NOT_FOUND', message: 'Target user or employee not found.' },
+    });
+  }
+
+  // Safety: Cannot impersonate another administrator
+  if (user?.role_id === 'admin') {
+    return res.status(403).json({
+      success: false,
+      error: { code: 'CANNOT_IMPERSONATE_ADMIN', message: 'Security restriction: Administrators cannot impersonate other administrators.' },
+    });
+  }
+
+  // Generate temporary impersonation token with admin identity embedded
+  const token = generateToken(
+    {
+      userId: user?.id || `temp_${employee.id}`,
+      email: user?.email || employee.email,
+      roleId: user?.role_id || 'employee',
+      employeeId: employee?.id || user?.employee_id || null,
+      impersonatedBy: adminId,
+      isImpersonating: true,
+    },
+    '2h'
+  );
+
+  // Log audit trail
+  await logAudit({
+    tableName: 'users',
+    recordId: user?.id || employee?.id,
+    action: 'IMPERSONATE',
+    changedBy: adminId || 'admin',
+    newValues: {
+      targetEmail: user?.email || employee?.email,
+      targetRole: user?.role_id || 'employee',
+      impersonatedBy: req.user?.email || adminId,
+    },
+  });
+
+  return res.json({
+    success: true,
+    data: {
+      token,
+      isImpersonating: true,
+      impersonatedBy: {
+        id: adminId,
+        email: req.user?.email,
+      },
+      user: {
+        id: user?.id || employee?.id,
+        email: user?.email || employee?.email,
+        role: { id: user?.role_id || 'employee', name: user?.role_name || 'Employee' },
+        employee: employee || null,
+      },
+    },
+  });
+});
+
+router.post('/auth/end-impersonate', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user?.isImpersonating || !req.user?.impersonatedBy) {
+    return res.status(400).json({
+      success: false,
+      error: { code: 'NOT_IMPERSONATING', message: 'Active session is not currently an impersonation session.' },
+    });
+  }
+
+  const adminId = req.user.impersonatedBy;
+  const adminRes = await query(
+    `SELECT u.*, r.name as role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = $1`,
+    [adminId]
+  );
+  const adminUser = adminRes.rows?.[0];
+
+  if (!adminUser) {
+    return res.status(404).json({
+      success: false,
+      error: { code: 'ADMIN_NOT_FOUND', message: 'Original administrator account not found.' },
+    });
+  }
+
+  const adminToken = generateToken({
+    userId: adminUser.id,
+    email: adminUser.email,
+    roleId: adminUser.role_id,
+    employeeId: adminUser.employee_id || null,
+  });
+
+  await logAudit({
+    tableName: 'users',
+    recordId: req.user.userId || req.user.id || '',
+    action: 'END_IMPERSONATE',
+    changedBy: adminId,
+  });
+
+  let employee: any = null;
+  if (adminUser.employee_id) {
+    const empRes = await query(`SELECT * FROM employees WHERE id = $1`, [adminUser.employee_id]);
+    employee = empRes.rows?.[0] || null;
+  }
+
+  return res.json({
+    success: true,
+    data: {
+      token: adminToken,
+      user: {
+        id: adminUser.id,
+        email: adminUser.email,
+        role: { id: adminUser.role_id, name: adminUser.role_name },
+        employee,
+      },
+    },
+  });
+});
+
+// Audit Trail endpoint
+router.get('/audit-logs', authMiddleware, requireRole(['admin', 'hr_manager', 'hr_payroll_manager']), async (req: AuthenticatedRequest, res: Response) => {
+  const { table_name, record_id, changed_by, action, page, limit } = req.query;
+  const logs = await getAuditLogs({
+    tableName: table_name ? String(table_name) : undefined,
+    recordId: record_id ? String(record_id) : undefined,
+    changedBy: changed_by ? String(changed_by) : undefined,
+    action: action ? String(action) : undefined,
+    page: page ? parseInt(String(page), 10) : 1,
+    limit: limit ? parseInt(String(limit), 10) : 25,
+  });
+
+  return res.json({
+    success: true,
+    data: logs.data,
+    pagination: {
+      total: logs.total,
+      page: logs.page,
+      totalPages: logs.totalPages,
     },
   });
 });
@@ -216,10 +395,7 @@ router.put('/auth/profile', authMiddleware, async (req: AuthenticatedRequest, re
 // Get all roles
 router.get('/roles', async (req, res) => {
   const result = await query('SELECT * FROM roles ORDER BY name');
-  let roles = result.rows || [];
-  if (!roles || roles.length === 0) {
-    roles = memoryDb.roles;
-  }
+  const roles = result.rows || [];
   return res.json({ success: true, data: roles });
 });
 
@@ -235,10 +411,7 @@ router.get('/departments', authMiddleware, async (req, res) => {
     LEFT JOIN employees e ON d.manager_id = e.id
     ORDER BY d.name
   `);
-  let depts = result.rows || [];
-  if (!depts || depts.length === 0) {
-    depts = memoryDb.departments;
-  }
+  const depts = result.rows || [];
   return res.json({ success: true, data: depts });
 });
 
@@ -256,11 +429,7 @@ router.post('/departments', authMiddleware, requireRole(['admin', 'hr_manager', 
     [deptId, name, deptCode]
   );
 
-  let newDept = result.rows?.[0];
-  if (!newDept) {
-    newDept = { id: deptId, name, code: deptCode, manager_id: null };
-    memoryDb.departments.push(newDept);
-  }
+  const newDept = result.rows?.[0] || { id: deptId, name, code: deptCode, manager_id: null };
 
   return res.status(201).json({ success: true, data: newDept });
 });
@@ -313,11 +482,33 @@ router.get('/employees', authMiddleware, async (req: AuthenticatedRequest, res: 
 
   sql += ' ORDER BY e.first_name, e.last_name';
 
-  const result = await query(sql, params);
-  let list = result.rows || [];
-  if (!list || list.length === 0) {
-    list = memoryDb.employees;
+  const page = req.query.page ? parseInt(String(req.query.page), 10) : undefined;
+  const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : (req.query.pageSize ? parseInt(String(req.query.pageSize), 10) : undefined);
+
+  if (page !== undefined && limit !== undefined && limit > 0) {
+    const countSql = `SELECT COUNT(*)::int as total FROM employees e ${conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : ''}`;
+    const countRes = await query(countSql, params);
+    const total = countRes.rows?.[0]?.total || 0;
+
+    const offset = Math.max(0, (page - 1) * limit);
+    sql += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(limit, offset);
+
+    const result = await query(sql, params);
+    return res.json({
+      success: true,
+      data: result.rows || [],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   }
+
+  const result = await query(sql, params);
+  const list = result.rows || [];
   return res.json({ success: true, data: list });
 });
 
@@ -345,8 +536,6 @@ router.get('/employees/:id', authMiddleware, async (req: AuthenticatedRequest, r
 
   if (empRes.rows && empRes.rows.length > 0) {
     employee = empRes.rows[0];
-  } else {
-    employee = memoryDb.employees.find((e) => String(e.id) === String(id));
   }
 
   if (!employee) {
@@ -358,9 +547,6 @@ router.get('/employees/:id', authMiddleware, async (req: AuthenticatedRequest, r
   const userAcc = await query(`SELECT role_id FROM users WHERE LOWER(email) = $1 OR employee_id = $2`, [employee.email?.toLowerCase(), String(employee.id)]);
   if (userAcc.rows && userAcc.rows.length > 0) {
     roleId = userAcc.rows[0].role_id;
-  } else {
-    const memUser = memoryDb.users.find((u) => u.employee_id === employee.id || u.email?.toLowerCase() === employee.email?.toLowerCase());
-    if (memUser) roleId = memUser.role_id;
   }
 
   // Real smart stats from database
@@ -434,7 +620,7 @@ router.post('/employees', authMiddleware, requireRole(['admin', 'hr_manager', 'h
   }
 
   const assignedRole = role_id || 'employee';
-  const userPassword = password || 'password123';
+  const userPassword = await bcrypt.hash(password || 'NexHR@2026', BCRYPT_SALT_ROUNDS);
   const empId = `emp_${Date.now()}`;
 
   // Check for duplicate email
@@ -472,9 +658,7 @@ router.post('/employees', authMiddleware, requireRole(['admin', 'hr_manager', 'h
     role_id: assignedRole,
   };
 
-  if (!result.rows || result.rows.length === 0) {
-    memoryDb.employees.push(newEmp);
-  }
+  // Employee must be created in DB — no fallback
 
   // Create linked running contract with salary structure
   const contractId = `ct_${empId}_1`;
@@ -522,6 +706,37 @@ router.post('/employees', authMiddleware, requireRole(['admin', 'hr_manager', 'h
       [`alloc_${empId}_sick`, empId, grantedSick, validFrom, validUntil]
     );
   }
+
+  // Dispatch Welcome Onboarding Email to newly created employee
+  if (email && email.includes('@')) {
+    const welcomeHtml = welcomeEmailTemplate({
+      employeeName: `${first_name} ${last_name}`.trim(),
+      email: email.toLowerCase(),
+      tempPassword: password || 'NexHR@2026',
+    });
+    enqueueEmail({
+      to: email,
+      subject: `Welcome to NexHR, ${first_name}! Your Portal Account Details`,
+      html: welcomeHtml,
+    });
+  }
+
+  // Audit log employee creation
+  await logAudit({
+    tableName: 'employees',
+    recordId: empId,
+    action: 'CREATE',
+    changedBy: req.user?.userId || req.user?.id || 'admin',
+    newValues: {
+      first_name,
+      last_name,
+      email,
+      job_position,
+      department_id,
+      role: assignedRole,
+      wage: empWage,
+    },
+  });
 
   return res.status(201).json({ success: true, data: { ...newEmp, role_id: assignedRole, salary_structure_id: structId, wage: empWage, pto_days: grantedPto, sick_days: grantedSick } });
 });
@@ -581,23 +796,6 @@ router.put('/employees/:id', authMiddleware, async (req: AuthenticatedRequest, r
 
   if (result.rows && result.rows.length > 0) {
     updatedEmp = result.rows[0];
-  } else {
-    const empIdx = memoryDb.employees.findIndex((e) => String(e.id) === String(id));
-    if (empIdx >= 0) {
-      const emp = memoryDb.employees[empIdx];
-      if (allowedFirstName) emp.first_name = allowedFirstName;
-      if (allowedLastName) emp.last_name = allowedLastName;
-      if (allowedEmail) emp.email = allowedEmail;
-      if (allowedPhone) emp.phone = allowedPhone;
-      if (allowedJobPosition) emp.job_position = allowedJobPosition;
-      if (allowedDepartmentId) emp.department_id = allowedDepartmentId;
-      if (allowedWorkingScheduleId) emp.working_schedule_id = allowedWorkingScheduleId;
-      if (allowedStatus) emp.status = allowedStatus;
-      if (allowedBankAccount) emp.bank_account = allowedBankAccount;
-      if (allowedPrivateEmail) emp.private_email = allowedPrivateEmail;
-      if (allowedAvatarUrl) emp.avatar_url = allowedAvatarUrl;
-      updatedEmp = emp;
-    }
   }
 
   if (allowedAvatarUrl) {
@@ -640,9 +838,10 @@ router.put('/employees/:id', authMiddleware, async (req: AuthenticatedRequest, r
   // Password & Role handling
   const targetRoleId = isManager ? role_id : null;
   if (password) {
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
     await query(
       `UPDATE users SET role_id = COALESCE($1, role_id), password_hash = $2, password = $2 WHERE employee_id = $3 OR LOWER(email) = $4`,
-      [targetRoleId, password, String(id), (email || updatedEmp.email).toLowerCase()]
+      [targetRoleId, hashedPassword, String(id), (email || updatedEmp.email).toLowerCase()]
     );
   } else if (targetRoleId) {
     await query(
@@ -675,6 +874,21 @@ router.put('/employees/:id', authMiddleware, async (req: AuthenticatedRequest, r
       );
     }
   }
+
+  await logAudit({
+    tableName: 'employees',
+    recordId: String(id),
+    action: 'UPDATE',
+    changedBy: req.user?.userId || req.user?.id || 'admin',
+    newValues: {
+      first_name: updatedEmp?.first_name,
+      last_name: updatedEmp?.last_name,
+      email: updatedEmp?.email,
+      job_position: updatedEmp?.job_position,
+      status: updatedEmp?.status,
+      role: targetRoleId || role_id,
+    },
+  });
 
   return res.json({ success: true, data: { ...updatedEmp, role_id: targetRoleId || role_id || 'employee', salary_structure_id, wage } });
 });
@@ -712,10 +926,7 @@ router.get('/contracts', authMiddleware, async (req, res) => {
   sql += ' ORDER BY c.start_date DESC';
 
   const result = await query(sql, params);
-  let contracts = result.rows || [];
-  if (!contracts || contracts.length === 0) {
-    contracts = memoryDb.contracts;
-  }
+  const contracts = result.rows || [];
   return res.json({ success: true, data: contracts });
 });
 
@@ -767,9 +978,20 @@ router.post('/contracts', authMiddleware, requireRole(['admin', 'hr_manager', 'h
     start_date, end_date: end_date || null, status: 'running'
   };
 
-  if (!result.rows || result.rows.length === 0) {
-    memoryDb.contracts.push(newContract);
-  }
+  await logAudit({
+    tableName: 'contracts',
+    recordId: contractId,
+    action: 'CREATE',
+    changedBy: req.user?.userId || req.user?.id || 'admin',
+    newValues: {
+      contract_ref: contractRef,
+      employee_id,
+      wage: Number(wage),
+      start_date,
+      end_date,
+      status: 'running',
+    },
+  });
 
   return res.status(201).json({ success: true, data: newContract });
 });
@@ -779,7 +1001,7 @@ router.put('/contracts/:id', authMiddleware, requireRole(['admin', 'hr_manager',
   const { contract_name, job_position, wage, start_date, end_date, status, working_schedule_id, salary_structure_id } = req.body;
 
   const existingRes = await query('SELECT * FROM contracts WHERE id = $1', [String(id)]);
-  let existing = existingRes.rows?.[0] || memoryDb.contracts.find((c) => String(c.id) === String(id));
+  let existing = existingRes.rows?.[0];
   if (!existing) {
     return res.status(404).json({ success: false, error: { message: 'Contract not found.' } });
   }
@@ -827,16 +1049,16 @@ router.put('/contracts/:id', authMiddleware, requireRole(['admin', 'hr_manager',
      String(id)]
   );
 
-  let updated = result.rows?.[0];
-  if (!updated) {
-    const cIdx = memoryDb.contracts.findIndex((c) => String(c.id) === String(id));
-    if (cIdx >= 0) {
-      if (contract_name) memoryDb.contracts[cIdx].contract_name = contract_name;
-      if (wage) memoryDb.contracts[cIdx].wage = Number(wage);
-      if (status) memoryDb.contracts[cIdx].status = status;
-      updated = memoryDb.contracts[cIdx];
-    }
-  }
+  const updated = result.rows?.[0];
+
+  await logAudit({
+    tableName: 'contracts',
+    recordId: String(id),
+    action: 'UPDATE',
+    changedBy: req.user?.userId || req.user?.id || 'admin',
+    oldValues: { wage: existing.wage, status: existing.status, start_date: existing.start_date, end_date: existing.end_date },
+    newValues: { wage, status, start_date, end_date },
+  });
 
   return res.json({ success: true, data: updated });
 });
@@ -847,11 +1069,9 @@ router.put('/contracts/:id', authMiddleware, requireRole(['admin', 'hr_manager',
 
 router.get('/schedules', authMiddleware, async (req, res) => {
   const schedRes = await query('SELECT * FROM working_schedules ORDER BY name');
-  let schedules = schedRes.rows || [];
+  const schedules = schedRes.rows || [];
 
-  if (!schedules || schedules.length === 0) {
-    schedules = memoryDb.schedules;
-  } else {
+  if (schedules.length > 0) {
     for (const sched of schedules) {
       const daysRes = await query(
         `SELECT * FROM working_schedule_days WHERE schedule_id = $1 ORDER BY day_of_week`,
@@ -909,9 +1129,6 @@ router.post('/schedules', authMiddleware, requireRole(['admin', 'hr_manager', 'h
         insertedDays.push(dayRes.rows[0]);
       }
     }
-  } else {
-    schedule = { id: schedId, name, total_hours_per_week: totalWeekHours, days: processedDays };
-    memoryDb.schedules.push(schedule);
   }
 
   return res.status(201).json({
