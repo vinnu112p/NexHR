@@ -93,7 +93,7 @@ export const HeroSection: React.FC = () => {
               NEW
             </span>
             <span className="text-xs font-semibold text-slate-700 group-hover:text-slate-900 transition-colors">
-              NextHR 2.0 Engine is now live
+              NexHR 2.0 Engine is now live
             </span>
             <ArrowRight className="w-3 h-3 text-[#5A5FE8] group-hover:translate-x-0.5 transition-transform" />
           </div>
@@ -109,7 +109,7 @@ export const HeroSection: React.FC = () => {
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg text-slate-600 max-w-xl font-normal leading-relaxed">
-            NextHR reconciles <strong>headcount directories</strong>, <strong>contract overlap guards</strong>, and <strong>biometric attendance</strong> into sequenced, mathematical payslips — completely eliminating manual spreadsheet errors.
+            NexHR reconciles <strong>headcount directories</strong>, <strong>contract overlap guards</strong>, and <strong>biometric attendance</strong> into sequenced, mathematical payslips — completely eliminating manual spreadsheet errors.
           </p>
 
           {/* Action CTAs */}
@@ -217,7 +217,7 @@ export const HeroSection: React.FC = () => {
                   N
                 </div>
                 <span className="font-extrabold text-xs text-[#0F172A] tracking-tight">
-                  NextHR
+                  NexHR
                 </span>
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#5A5FE8]/10 text-[#5A5FE8] font-mono ml-1">
                   Sep 2026

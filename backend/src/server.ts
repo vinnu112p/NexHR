@@ -39,7 +39,7 @@ app.use('/api/v1/auth/login', authLimiter);
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    service: 'NextHR Backend API',
+    service: 'NexHR Backend API',
     timestamp: new Date().toISOString(),
   });
 });
@@ -64,6 +64,6 @@ const server = http.createServer(app);
 initWebSocket(server);
 
 server.listen(PORT, () => {
-  console.log(`🚀 NextHR Backend API running on http://localhost:${PORT}`);
-  console.log(`⚡ NextHR WebSocket running on ws://localhost:${PORT}/ws`);
+  console.log(`🚀 NexHR Backend API running on http://localhost:${PORT}`);
+  console.log(`⚡ NexHR WebSocket running on ws://localhost:${PORT}/ws`);
 });

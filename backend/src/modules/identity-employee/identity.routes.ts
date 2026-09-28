@@ -26,13 +26,17 @@ router.post('/auth/login', async (req, res) => {
 
   let user: any = null;
   const emailLower = email.toLowerCase().trim();
-  const altEmail = emailLower.includes('@nexthr.com')
-    ? emailLower.replace('@nexthr.com', '@peoplepay360.com')
-    : emailLower.replace('@peoplepay360.com', '@nexthr.com');
+  const username = emailLower.split('@')[0];
+  const candidateEmails = [
+    emailLower,
+    `${username}@nexhr.com`,
+    `${username}@nexthr.com`,
+    `${username}@peoplepay360.com`,
+  ];
 
   const userRes = await query(
-    `SELECT u.*, r.name as role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE LOWER(u.email) = $1 OR LOWER(u.email) = $2`,
-    [emailLower, altEmail]
+    `SELECT u.*, r.name as role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE LOWER(u.email) = ANY($1::text[])`,
+    [candidateEmails]
   );
 
   if (userRes.rows && userRes.rows.length > 0) {

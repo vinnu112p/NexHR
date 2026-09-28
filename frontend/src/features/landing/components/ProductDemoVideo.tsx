@@ -185,7 +185,7 @@ export const ProductDemoVideo: React.FC = () => {
 
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-500 text-xs font-mono">
               <Lock className="w-3 h-3 text-[#5A5FE8]" />
-              <span className="text-[11px] font-semibold">app.nexthr.com/payruns/interactive-demo</span>
+              <span className="text-[11px] font-semibold">app.nexhr.com/payruns/interactive-demo</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -208,7 +208,7 @@ export const ProductDemoVideo: React.FC = () => {
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#4F46E5] to-[#06B6D4] text-white flex items-center justify-center font-extrabold text-xs">
                   N
                 </div>
-                <span className="font-extrabold text-xs text-[#0F172A]">NextHR Platform</span>
+                <span className="font-extrabold text-xs text-[#0F172A]">NexHR Platform</span>
                 <span className="text-[10px] font-mono text-slate-400 ml-1">· Batch #PR-2026-09</span>
               </div>
 
@@ -230,7 +230,7 @@ export const ProductDemoVideo: React.FC = () => {
               </div>
               <div>
                 <strong className="text-xs text-[#0F172A] block leading-tight">Payslip Disbursed &amp; Emailed</strong>
-                <span className="text-[10px] text-slate-500">Delivered to amara.chen@nexthr.com</span>
+                <span className="text-[10px] text-slate-500">Delivered to amara.chen@nexhr.com</span>
               </div>
               <Send className="w-4 h-4 text-[#5A5FE8] ml-2" />
             </div>

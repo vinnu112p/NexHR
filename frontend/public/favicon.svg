@@ -1,18 +1,44 @@
-<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="fav_bg" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stopColor="#1E1B4B" />
-      <stop offset="100%" stopColor="#0F172A" />
+    <linearGradient id="fav_bg" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#101322" />
+      <stop offset="100%" stopColor="#05060A" />
     </linearGradient>
-    <linearGradient id="fav_n" x1="12" y1="12" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+    <linearGradient id="fav_rim" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stopColor="#818CF8" />
-      <stop offset="50%" stopColor="#6366F1" />
-      <stop offset="100%" stopColor="#38BDF8" />
+      <stop offset="50%" stopColor="#06B6D4" />
+      <stop offset="100%" stopColor="#C084FC" />
+    </linearGradient>
+    <linearGradient id="fav_left" x1="24" y1="92" x2="44" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#4338CA" />
+      <stop offset="100%" stopColor="#818CF8" />
+    </linearGradient>
+    <linearGradient id="fav_diag" x1="36" y1="22" x2="90" y2="94" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#6366F1" />
+      <stop offset="100%" stopColor="#C084FC" />
+    </linearGradient>
+    <linearGradient id="fav_cyan" x1="38" y1="92" x2="102" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#06B6D4" />
+      <stop offset="100%" stopColor="#34D399" />
     </linearGradient>
   </defs>
-  <rect width="48" height="48" rx="14" fill="url(#fav_bg)" />
-  <path d="M13 14C13 13 13.8 12.2 14.8 12.2H17.2C18.2 12.2 19 13 19 14V34C19 35 18.2 35.8 17.2 35.8H14.8C13.8 35.8 13 35 13 34V14Z" fill="#818CF8" />
-  <path d="M17.5 13.5C18.2 12.5 19.5 12.2 20.5 12.8L30.5 25.2C31.2 26 31 27.2 30.2 27.8L28.5 29C27.8 29.6 26.6 29.4 26 28.6L16.2 16.2C15.6 15.3 15.8 14.2 16.7 13.6L17.5 13.5Z" fill="url(#fav_n)" />
-  <path d="M29 14C29 13 29.8 12.2 30.8 12.2H33.2C34.2 12.2 35 13 35 14V34C35 35 34.2 35.8 33.2 35.8H30.8C29.8 35.8 29 35 29 34V14Z" fill="#38BDF8" />
-  <circle cx="24" cy="24" r="2.5" fill="#FFFFFF" />
+
+  <rect x="2" y="2" width="116" height="116" rx="30" fill="url(#fav_bg)" stroke="url(#fav_rim)" stroke-width="3" />
+
+  <!-- Rear Cross -->
+  <path d="M40 88L94 40C98 35 97 28 92 24C87 20 80 21 76 26L38 74C35 78 36 84 40 88Z" fill="url(#fav_cyan)" />
+
+  <!-- Left Pillar -->
+  <path d="M24 90V35L38 22V77L24 90Z" fill="url(#fav_left)" />
+  <path d="M24 35L38 22L46 30L32 43L24 35Z" fill="#A5B4FC" />
+
+  <!-- Fore Diagonal Blade -->
+  <path d="M38 22L88 84C92 89 98 89 102 85C106 81 106 74 101 69L64 24C60 19 54 18 50 21L38 22Z" fill="url(#fav_diag)" />
+
+  <!-- Right Tower -->
+  <path d="M84 42L98 25C101 22 105 24 105 28V76C105 82 101 86 96 88L84 74V42Z" fill="url(#fav_left)" />
+
+  <!-- Center Node -->
+  <circle cx="62" cy="54" r="4.5" fill="#FFFFFF" />
+  <circle cx="62" cy="54" r="2.2" fill="#6366F1" />
 </svg>

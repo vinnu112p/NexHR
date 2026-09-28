@@ -1,7 +1,7 @@
-# NextHR — Next-Gen Enterprise HR & Payroll Operations Platform
+# NexHR — Next-Gen Enterprise HR & Payroll Operations Platform
 
 <div align="center">
-  <img src="https://img.shields.io/badge/NextHR-Enterprise%20Edition-4F46E5?style=for-the-badge&logo=shield&logoColor=white" alt="NextHR Edition" />
+  <img src="https://img.shields.io/badge/NexHR-Enterprise%20Edition-4F46E5?style=for-the-badge&logo=shield&logoColor=white" alt="NexHR Edition" />
   <img src="https://img.shields.io/badge/Architecture-Clean%20Modular%20Monolith-06B6D4?style=for-the-badge&logo=diagram-next&logoColor=white" alt="Architecture" />
   <img src="https://img.shields.io/badge/Payroll%20Engine-Deterministic%20AST-10B981?style=for-the-badge&logo=calculator&logoColor=white" alt="Engine" />
   <img src="https://img.shields.io/badge/Real--Time-WebSocket%20Sync-F59E0B?style=for-the-badge&logo=websocket&logoColor=white" alt="WebSocket" />
@@ -18,14 +18,14 @@
 
 <br />
 
-> **NextHR** is a mission-critical, enterprise-grade HR & Payroll operations ecosystem built for high-growth modern businesses. Designed to replace disconnected spreadsheets and legacy software, NextHR unifies **Employee Identity**, **Multi-Tier RBAC**, **ServiceNow-Style User Impersonation**, **Immutable Audit Trails**, **Working Schedules**, **Live Biometric Attendance & Leaves**, **AST-Driven Mathematical Payroll Engine**, **Transactional Email Dispatch with PDF Generation**, and **Real-Time WebSocket Synchronization** into one unified, auditable operational flow.
+> **NexHR** is a mission-critical, enterprise-grade HR & Payroll operations ecosystem built for high-growth modern businesses. Designed to replace disconnected spreadsheets and legacy software, NexHR unifies **Employee Identity**, **Multi-Tier RBAC**, **ServiceNow-Style User Impersonation**, **Immutable Audit Trails**, **Working Schedules**, **Live Biometric Attendance & Leaves**, **AST-Driven Mathematical Payroll Engine**, **Transactional Email Dispatch with PDF Generation**, and **Real-Time WebSocket Synchronization** into one unified, auditable operational flow.
 
 ---
 
 ## Table of Contents
 
 1. [Executive Summary & Core Value Proposition](#1-executive-summary--core-value-proposition)
-2. [What's New in NextHR Enterprise Edition](#2-whats-new-in-nexthr-enterprise-edition)
+2. [What's New in NexHR Enterprise Edition](#2-whats-new-in-nexhr-enterprise-edition)
 3. [System Architecture](#3-system-architecture)
 4. [Real-Time WebSocket Subsystem](#4-real-time-websocket-subsystem)
 5. [End-to-End Operational Lifecycle](#5-end-to-end-operational-lifecycle)
@@ -53,7 +53,7 @@
 
 Traditional HR and Payroll systems operate in disconnected silos: attendance sits in a physical kiosk, leave requests live in emails, contracts are stored in filing systems, and payroll is calculated via fragile spreadsheets.
 
-**NextHR delivers five core architectural pillars**:
+**NexHR delivers five core architectural pillars**:
 1. **Single Source of Truth**: All operational contexts (contracts, schedules, attendances, leaves, bank accounts) anchor directly to the employee master record.
 2. **Deterministic Mathematical Proration**: Calculates exact calendar-day and working-day wages for mid-month hires, terminations, and unpaid leaves down to the exact cent.
 3. **Safe AST Salary Rule Engine**: Replaces dangerous code-evaluation functions with an isolated mathematical sandbox supporting expressions, caps, and conditional rules.
@@ -62,7 +62,7 @@ Traditional HR and Payroll systems operate in disconnected silos: attendance sit
 
 ---
 
-## 2. What's New in NextHR Enterprise Edition
+## 2. What's New in NexHR Enterprise Edition
 
 - **ServiceNow-Style User Impersonation**: One-click user perspective switching with amber UI status banners, JWT impersonation claims, and anti-admin impersonation protection.
 - **Full Transactional Email System**: Asynchronous SMTP dispatch with retry queue, responsive HTML templates (Welcome, Leave Approved/Rejected, Payslip), and real vector PDF attachments.
@@ -154,7 +154,7 @@ graph TD
 ## 6. Core Functional Modules
 
 ### Authentication & 5-Tier RBAC Matrix
-NextHR implements a strict role hierarchy enforced across client-side route guards and server-side middleware:
+NexHR implements a strict role hierarchy enforced across client-side route guards and server-side middleware:
 
 | Role | HR & Contracts | Salary Structures & Rules | Payruns & Payslips | User Management & Audit | Impersonation |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -213,7 +213,7 @@ NextHR implements a strict role hierarchy enforced across client-side route guar
 
 ## 7. Database Architecture & 16 Production Indexes
 
-NextHR connects to Supabase PostgreSQL using an IPv4 transaction pooler host with 16 production B-Tree indexes:
+NexHR connects to Supabase PostgreSQL using an IPv4 transaction pooler host with 16 production B-Tree indexes:
 
 ```sql
 -- High-Traffic Performance Indexes
@@ -266,7 +266,7 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=notifications@nexhr.internal
 SMTP_PASS=your-app-password
-SMTP_FROM="NextHR Platform <notifications@nexhr.internal>"
+SMTP_FROM="NexHR Platform <notifications@nexhr.internal>"
 ```
 
 **Frontend Configuration (`frontend/.env`):**
@@ -312,11 +312,11 @@ The database is pre-seeded with accounts for each role tier (all use password: `
 
 | Role | Email Address | Password | Intended Screen Experience |
 | :--- | :--- | :--- | :--- |
-| **System Admin** | `admin@nexthr.com` | `password123` | Unrestricted access across all modules, Audit Logs & Impersonation |
-| **HR Payroll Manager** | `payroll@nexthr.com` | `password123` | Full HR operations + Salary Rule authoring + Payrun computation |
-| **HR Payroll User** | `payroll.user@nexthr.com` | `password123` | Daily HR + Payrun processing (read-only rules) |
-| **HR Manager** | `hr.manager@nexthr.com` | `password123` | Full HR, Attendance & Leave approvals (Payroll locked) |
-| **Employee** | `amara.chen@nexthr.com` | `password123` | Self-service attendance kiosk, PTO requests, personal payslips |
+| **System Admin** | `admin@nexhr.com` | `password123` | Unrestricted access across all modules, Audit Logs & Impersonation |
+| **HR Payroll Manager** | `payroll@nexhr.com` | `password123` | Full HR operations + Salary Rule authoring + Payrun computation |
+| **HR Payroll User** | `payroll.user@nexhr.com` | `password123` | Daily HR + Payrun processing (read-only rules) |
+| **HR Manager** | `hr.manager@nexhr.com` | `password123` | Full HR, Attendance & Leave approvals (Payroll locked) |
+| **Employee** | `amara.chen@nexhr.com` | `password123` | Self-service attendance kiosk, PTO requests, personal payslips |
 
 *Note: The login screen contains an integrated credentials reference drawer with one-click copy.*
 
@@ -379,7 +379,7 @@ npm test
 ## 12. Project Directory Layout
 
 ```text
-NextHR/
+NexHR/
 ├── backend/
 │   ├── src/
 │   │   ├── core/

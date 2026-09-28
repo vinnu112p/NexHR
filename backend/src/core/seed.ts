@@ -41,10 +41,10 @@ export const initSeed = async (pool: Pool) => {
     ON CONFLICT DO NOTHING;
 
     INSERT INTO employees (id, first_name, last_name, email, phone, job_position, department_id, working_schedule_id, status, private_email, bank_account, hire_date) VALUES
-      ('emp_amara', 'Amara', 'Chen', 'amara.chen@nexthr.com', '+1 (555) 234-5678', 'Sales Associate', 'dept_sales', 'sched_std_40h', 'active', 'amara.personal@gmail.com', 'US98BANK1020304050', '2026-01-15'),
-      ('emp_admin', 'System', 'Admin', 'admin@nexthr.com', '+1 (555) 000-0000', 'Platform Administrator', 'dept_hr', 'sched_std_40h', 'active', 'admin@nexthr.com', 'US00BANK0000000000', '2025-01-01'),
-      ('emp_hrmgr', 'HR', 'Manager', 'hr.manager@nexthr.com', '+1 (555) 111-2222', 'HR Manager', 'dept_hr', 'sched_std_40h', 'active', 'hr.manager@nexthr.com', 'US11BANK1111111111', '2025-01-01'),
-      ('emp_payroll', 'Payroll', 'Manager', 'payroll@nexthr.com', '+1 (555) 333-4444', 'Payroll Manager', 'dept_hr', 'sched_std_40h', 'active', 'payroll@nexthr.com', 'US33BANK3333333333', '2025-01-01')
+      ('emp_amara', 'Amara', 'Chen', 'amara.chen@nexhr.com', '+1 (555) 234-5678', 'Sales Associate', 'dept_sales', 'sched_std_40h', 'active', 'amara.personal@gmail.com', 'US98BANK1020304050', '2026-01-15'),
+      ('emp_admin', 'System', 'Admin', 'admin@nexhr.com', '+1 (555) 000-0000', 'Platform Administrator', 'dept_hr', 'sched_std_40h', 'active', 'admin@nexhr.com', 'US00BANK0000000000', '2025-01-01'),
+      ('emp_hrmgr', 'HR', 'Manager', 'hr.manager@nexhr.com', '+1 (555) 111-2222', 'HR Manager', 'dept_hr', 'sched_std_40h', 'active', 'hr.manager@nexhr.com', 'US11BANK1111111111', '2025-01-01'),
+      ('emp_payroll', 'Payroll', 'Manager', 'payroll@nexhr.com', '+1 (555) 333-4444', 'Payroll Manager', 'dept_hr', 'sched_std_40h', 'active', 'payroll@nexhr.com', 'US33BANK3333333333', '2025-01-01')
     ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email;
 
     INSERT INTO contracts (id, contract_ref, contract_name, employee_id, job_position, wage, start_date, status, working_schedule_id, salary_structure_id) VALUES
@@ -103,17 +103,17 @@ export const initSeed = async (pool: Pool) => {
   // Insert users with hashed password
   await pool.query(`
     INSERT INTO users (id, email, password_hash, password, role_id, employee_id) VALUES
-      ('usr_admin', 'admin@nexthr.com', $1, $1, 'admin', 'emp_admin'),
-      ('usr_hrmgr', 'hr.manager@nexthr.com', $1, $1, 'hr_manager', 'emp_hrmgr'),
-      ('usr_payroll', 'payroll@nexthr.com', $1, $1, 'hr_payroll_manager', 'emp_payroll'),
-      ('usr_amara', 'amara.chen@nexthr.com', $1, $1, 'employee', 'emp_amara')
+      ('usr_admin', 'admin@nexhr.com', $1, $1, 'admin', 'emp_admin'),
+      ('usr_hrmgr', 'hr.manager@nexhr.com', $1, $1, 'hr_manager', 'emp_hrmgr'),
+      ('usr_payroll', 'payroll@nexhr.com', $1, $1, 'hr_payroll_manager', 'emp_payroll'),
+      ('usr_amara', 'amara.chen@nexhr.com', $1, $1, 'employee', 'emp_amara')
     ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email;
   `, [hashedPassword]);
 
   await pool.query(`
-    UPDATE users SET email = REPLACE(email, '@peoplepay360.com', '@nexthr.com') WHERE email LIKE '%@peoplepay360.com';
-  `);
-  await pool.query(`
-    UPDATE employees SET email = REPLACE(email, '@peoplepay360.com', '@nexthr.com') WHERE email LIKE '%@peoplepay360.com';
+    UPDATE users SET email = REPLACE(email, '@peoplepay360.com', '@nexhr.com') WHERE email LIKE '%@peoplepay360.com';
+    UPDATE users SET email = REPLACE(email, '@nexthr.com', '@nexhr.com') WHERE email LIKE '%@nexthr.com';
+    UPDATE employees SET email = REPLACE(email, '@peoplepay360.com', '@nexhr.com') WHERE email LIKE '%@peoplepay360.com';
+    UPDATE employees SET email = REPLACE(email, '@nexthr.com', '@nexhr.com') WHERE email LIKE '%@nexthr.com';
   `);
 };
