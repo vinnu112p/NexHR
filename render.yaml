@@ -11,7 +11,15 @@ services:
         value: production
       - key: PORT
         value: 10000
-      - key: JWT_SECRET
-        generateValue: true
       - key: DATABASE_URL
         sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: "NexHR Notifications <onboarding@resend.dev>"
+      - key: JWT_SECRET
+        generateValue: true
