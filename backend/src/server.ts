@@ -1,6 +1,8 @@
 import http from 'http';
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { registerRoutes } from './routes.loader.js';
@@ -46,6 +48,25 @@ app.get('/health', (req, res) => {
 
 // Register feature routes
 registerRoutes(app);
+
+// Serve compiled frontend SPA if present (All-in-One deployment support)
+const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+const altFrontendDist = path.resolve(__dirname, '../../../frontend/dist');
+const clientDist = fs.existsSync(frontendDist)
+  ? frontendDist
+  : fs.existsSync(altFrontendDist)
+    ? altFrontendDist
+    : null;
+
+if (clientDist) {
+  app.use(express.static(clientDist));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/health') || req.path.startsWith('/ws')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

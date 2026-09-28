@@ -10,7 +10,7 @@ import { Button } from '../../../components/ui/Button';
 import { useRealtimeSubscription } from '../../../context/RealtimeContext';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, Tooltip } from 'recharts';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 interface DashboardSummary {
   salary_fund: { total_net: number; total_gross: number; payslip_count: number };

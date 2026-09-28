@@ -100,10 +100,28 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!isMounted) return;
       setConnectionStatus('connecting');
 
-      const hostname = window.location.hostname || 'localhost';
-      const wsUrl = window.location.protocol === 'https:'
-        ? `wss://${hostname}:3000/ws`
-        : `ws://${hostname}:3000/ws`;
+      let wsUrl = import.meta.env.VITE_WS_URL;
+
+      if (!wsUrl) {
+        const apiBase = import.meta.env.VITE_API_BASE_URL || '';
+        if (apiBase.startsWith('http')) {
+          try {
+            const parsed = new URL(apiBase);
+            const proto = parsed.protocol === 'https:' ? 'wss:' : 'ws:';
+            wsUrl = `${proto}//${parsed.host}/ws`;
+          } catch {}
+        }
+      }
+
+      if (!wsUrl) {
+        const isSecure = window.location.protocol === 'https:';
+        const hostname = window.location.hostname || 'localhost';
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          wsUrl = isSecure ? `wss://${hostname}:3000/ws` : `ws://${hostname}:3000/ws`;
+        } else {
+          wsUrl = isSecure ? `wss://${window.location.host}/ws` : `ws://${window.location.host}/ws`;
+        }
+      }
 
       try {
         const ws = new WebSocket(wsUrl);
